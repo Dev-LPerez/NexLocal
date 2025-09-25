@@ -22,50 +22,29 @@
     <h3 class="text-3xl font-bold text-center text-primary-dark mb-8">Experiencias Populares</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {{-- Experience Card 1 --}}
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <img src="https://via.placeholder.com/400x300.png/E7DBEF/49225B?text=Café" alt="Experiencia de café" class="w-full h-48 object-cover">
-            <div class="p-6">
-                <h4 class="font-bold text-xl mb-2 text-primary">Tour de Café en el Eje Cafetero</h4>
-                <p class="text-gray-700 text-base">
-                    Aprende sobre el proceso del café, desde la semilla hasta la taza, con un agricultor local.
-                </p>
-                <div class="mt-4">
-                    <span class="inline-block bg-light rounded-full px-3 py-1 text-sm font-semibold text-primary-dark mr-2 mb-2">#Café</span>
-                    <span class="inline-block bg-light rounded-full px-3 py-1 text-sm font-semibold text-primary-dark mr-2 mb-2">#Cultura</span>
+        @forelse ($experiences as $experience)
+            {{-- Tarjeta de Experiencia Dinámica --}}
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <img src="https://via.placeholder.com/400x300.png/E7DBEF/49225B?text={{ urlencode($experience->location) }}" alt="Imagen de {{ $experience->title }}" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h4 class="font-bold text-xl mb-2 text-primary">{{ $experience->title }}</h4>
+                    <p class="text-gray-700 text-base">
+                        {{ Str::limit($experience->description, 100) }} {{-- Limita la descripción a 100 caracteres --}}
+                    </p>
+                    <div class="mt-4 flex justify-between items-center">
+                        <span class="font-bold text-lg text-primary-dark">${{ number_format($experience->price, 0, ',', '.') }} COP</span>
+                            <a href="#" class="bg-secondary text-white font-bold text-sm py-2 px-3 rounded-full hover:bg-primary-dark transition duration-300">
+                            Ver Detalles
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        {{-- Experience Card 2 --}}
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <img src="https://via.placeholder.com/400x300.png/E7DBEF/49225B?text=Graffiti" alt="Tour de Graffiti" class="w-full h-48 object-cover">
-            <div class="p-6">
-                <h4 class="font-bold text-xl mb-2 text-primary">Graffiti Tour en la Comuna 13</h4>
-                <p class="text-gray-700 text-base">
-                    Descubre la historia de resiliencia y arte urbano en uno de los barrios más vibrantes de Medellín.
-                </p>
-                <div class="mt-4">
-                    <span class="inline-block bg-light rounded-full px-3 py-1 text-sm font-semibold text-primary-dark mr-2 mb-2">#Arte</span>
-                    <span class="inline-block bg-light rounded-full px-3 py-1 text-sm font-semibold text-primary-dark mr-2 mb-2">#Medellín</span>
-                </div>
+        @empty
+            {{-- Mensaje si no hay experiencias --}}
+            <div class="col-span-3 text-center py-12">
+                <p class="text-xl text-gray-500">Aún no hay experiencias disponibles. ¡Sé el primero en crear una!</p>
             </div>
-        </div>
-
-        {{-- Experience Card 3 --}}
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <img src="https://via.placeholder.com/400x300.png/E7DBEF/49225B?text=Playa" alt="Playa del Tayrona" class="w-full h-48 object-cover">
-            <div class="p-6">
-                <h4 class="font-bold text-xl mb-2 text-primary">Senderismo en el Parque Tayrona</h4>
-                <p class="text-gray-700 text-base">
-                    Explora playas vírgenes y selva exuberante con un guía indígena de la Sierra Nevada.
-                </p>
-                <div class="mt-4">
-                    <span class="inline-block bg-light rounded-full px-3 py-1 text-sm font-semibold text-primary-dark mr-2 mb-2">#Naturaleza</span>
-                    <span class="inline-block bg-light rounded-full px-3 py-1 text-sm font-semibold text-primary-dark mr-2 mb-2">#Aventura</span>
-                </div>
-            </div>
-        </div>
+        @endforelse
 
     </div>
 </section>

@@ -3,30 +3,16 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExperienceController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+use App\Http\Controllers\VerificationController; // <-- Añade esta línea
 
 // --- Ruta Pública Principal ---
-// Aquí está la corrección: hacemos que la página de inicio vuelva a ser
-// manejada por nuestro ExperienceController para que cargue los datos.
 Route::get('/', [ExperienceController::class, 'index'])->name('home');
-
-
-// --- Rutas que requieren autenticación (Breeze y nuestras rutas protegidas) ---
 
 // Esta es la ruta del dashboard que crea Breeze. La dejamos como está.
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 // Este grupo de rutas requiere que el usuario haya iniciado sesión
 Route::middleware('auth')->group(function () {
@@ -36,8 +22,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Mantenemos nuestras rutas de experiencias aquí para que estén protegidas.
-    // Solo usuarios logueados podrán crear, editar, etc.
     Route::resource('experiences', ExperienceController::class);
+
+    // --- RUTAS PARA LA VERIFICACIÓN DE IDENTIDAD ---
+    Route::get('/verify-identity', [VerificationController::class, 'create'])->name('verification.create');
+    Route::post('/verify-identity', [VerificationController::class, 'store'])->name('verification.store');
 });
 
 

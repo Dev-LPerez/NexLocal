@@ -71,6 +71,23 @@
                             </div>
                         </div>
 
+                        {{-- Qué Incluye / No Incluye --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <x-input-label for="includes" value="¿Qué Incluye?" />
+                                <textarea name="includes" id="includes" rows="4" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Un ítem por línea...">{{ old('includes', is_array($experience->includes) ? implode("\n", $experience->includes) : '') }}</textarea>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Un ítem por línea.</p>
+                                <x-input-error :messages="$errors->get('includes')" class="mt-1"/>
+                            </div>
+
+                            <div>
+                                <x-input-label for="not_includes" value="¿Qué NO Incluye?" />
+                                <textarea name="not_includes" id="not_includes" rows="4" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Un ítem por línea...">{{ old('not_includes', is_array($experience->not_includes) ? implode("\n", $experience->not_includes) : '') }}</textarea>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Un ítem por línea.</p>
+                                <x-input-error :messages="$errors->get('not_includes')" class="mt-1"/>
+                            </div>
+                        </div>
+
                         {{-- Imagen Principal con Vista Previa --}}
                         <div x-data="{ imagePreview: '{{ $experience->image_path ? Storage::url($experience->image_path) : '' }}' }">
                             <x-input-label for="image" value="Imagen Principal (Opcional: cambiar)" />

@@ -90,12 +90,35 @@ class ExperienceController extends Controller
             'price' => 'required|numeric|min:0',
             'duration' => 'required|string|max:100',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'includes' => 'nullable|string',
+            'not_includes' => 'nullable|string',
         ]);
+
         $validatedData['user_id'] = Auth::id();
+
+        // Procesar el campo de imagen
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('experiences', 'public');
             $validatedData['image_path'] = $path;
         }
+
+        // Convertir includes y not_includes de texto a array
+        if (!empty($validatedData['includes'])) {
+            $validatedData['includes'] = array_filter(
+                array_map('trim', explode("\n", $validatedData['includes']))
+            );
+        } else {
+            $validatedData['includes'] = [];
+        }
+
+        if (!empty($validatedData['not_includes'])) {
+            $validatedData['not_includes'] = array_filter(
+                array_map('trim', explode("\n", $validatedData['not_includes']))
+            );
+        } else {
+            $validatedData['not_includes'] = [];
+        }
+
         Experience::create($validatedData);
         return redirect()->route('dashboard')->with('success', '¡Experiencia creada con éxito!');
     }
@@ -139,6 +162,8 @@ class ExperienceController extends Controller
             'price' => 'required|numeric|min:0',
             'duration' => 'required|string|max:100',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'includes' => 'nullable|string',
+            'not_includes' => 'nullable|string',
         ]);
 
         if ($request->hasFile('image')) {
@@ -148,6 +173,23 @@ class ExperienceController extends Controller
             }
             $path = $request->file('image')->store('experiences', 'public');
             $validatedData['image_path'] = $path;
+        }
+
+        // Convertir includes y not_includes de texto a array
+        if (!empty($validatedData['includes'])) {
+            $validatedData['includes'] = array_filter(
+                array_map('trim', explode("\n", $validatedData['includes']))
+            );
+        } else {
+            $validatedData['includes'] = [];
+        }
+
+        if (!empty($validatedData['not_includes'])) {
+            $validatedData['not_includes'] = array_filter(
+                array_map('trim', explode("\n", $validatedData['not_includes']))
+            );
+        } else {
+            $validatedData['not_includes'] = [];
         }
 
         $experience->update($validatedData);

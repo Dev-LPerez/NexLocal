@@ -70,6 +70,23 @@
                             </div>
                         </div>
 
+                        {{-- Qué Incluye / No Incluye --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <x-input-label for="includes" value="¿Qué Incluye?" />
+                                <textarea name="includes" id="includes" rows="4" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Escribe cada ítem en una línea nueva:&#10;- Transporte&#10;- Guía bilingüe&#10;- Degustación de comida">{{ old('includes') }}</textarea>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Un ítem por línea. Esto se mostrará a los turistas.</p>
+                                <x-input-error :messages="$errors->get('includes')" class="mt-1"/>
+                            </div>
+
+                            <div>
+                                <x-input-label for="not_includes" value="¿Qué NO Incluye?" />
+                                <textarea name="not_includes" id="not_includes" rows="4" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Escribe cada ítem en una línea nueva:&#10;- Almuerzo&#10;- Propinas&#10;- Souvenirs">{{ old('not_includes') }}</textarea>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Un ítem por línea. Esto ayuda a tener expectativas claras.</p>
+                                <x-input-error :messages="$errors->get('not_includes')" class="mt-1"/>
+                            </div>
+                        </div>
+
                         {{-- Imagen Principal con Vista Previa --}}
                         <div x-data="{ imagePreview: null }">
                             <x-input-label for="image" value="Imagen Principal *" />

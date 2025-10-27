@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Crea una Nueva Experiencia
+            Editar Experiencia: {{ $experience->title }}
         </h2>
     </x-slot>
 
@@ -22,22 +22,23 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('experiences.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <form action="{{ route('experiences.update', $experience) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                         @csrf
+                        @method('PUT')
 
                         {{-- Título y Categoría en una fila --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <x-input-label for="title" value="Título de la Experiencia *" />
-                                <x-text-input type="text" name="title" id="title" class="mt-1 block w-full" placeholder="Ej: Tour Gastronómico por el Mercado Central" :value="old('title')" required />
+                                <x-text-input type="text" name="title" id="title" class="mt-1 block w-full" placeholder="Ej: Tour Gastronómico por el Mercado Central" :value="old('title', $experience->title)" required />
                                 <x-input-error :messages="$errors->get('title')" class="mt-1"/>
                             </div>
                             <div>
                                 <x-input-label for="category" value="Categoría *" />
                                 <select name="category" id="category" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                                    <option value="" disabled {{ old('category') ? '' : 'selected' }}>Selecciona una categoría</option>
+                                    <option value="" disabled {{ old('category', $experience->category) ? '' : 'selected' }}>Selecciona una categoría</option>
                                     @foreach($categories as $category)
-                                        <option value="{{ $category }}" {{ old('category') == $category ? 'selected' : '' }}>{{ $category }}</option>
+                                        <option value="{{ $category }}" {{ old('category', $experience->category) == $category ? 'selected' : '' }}>{{ $category }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('category')" class="mt-1"/>
@@ -47,7 +48,7 @@
                         {{-- Descripción --}}
                         <div>
                             <x-input-label for="description" value="Descripción Detallada *" />
-                            <textarea name="description" id="description" rows="5" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Describe qué hace única tu experiencia, el itinerario, qué verán o harán los turistas..." required>{{ old('description') }}</textarea>
+                            <textarea name="description" id="description" rows="5" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Describe qué hace única tu experiencia..." required>{{ old('description', $experience->description) }}</textarea>
                             <x-input-error :messages="$errors->get('description')" class="mt-1"/>
                         </div>
 
@@ -55,24 +56,24 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <x-input-label for="location" value="Ubicación *" />
-                                <x-text-input type="text" name="location" id="location" class="mt-1 block w-full" placeholder="Ej: Cereté, Córdoba" :value="old('location')" required />
+                                <x-text-input type="text" name="location" id="location" class="mt-1 block w-full" placeholder="Ej: Cereté, Córdoba" :value="old('location', $experience->location)" required />
                                 <x-input-error :messages="$errors->get('location')" class="mt-1"/>
                             </div>
                             <div>
                                 <x-input-label for="price" value="Precio por persona (COP) *" />
-                                <x-text-input type="number" name="price" id="price" step="100" min="0" class="mt-1 block w-full" placeholder="Ej: 50000" :value="old('price')" required />
+                                <x-text-input type="number" name="price" id="price" step="100" min="0" class="mt-1 block w-full" placeholder="Ej: 50000" :value="old('price', $experience->price)" required />
                                 <x-input-error :messages="$errors->get('price')" class="mt-1"/>
                             </div>
                             <div>
                                 <x-input-label for="duration" value="Duración *" />
-                                <x-text-input type="text" name="duration" id="duration" class="mt-1 block w-full" placeholder="Ej: 3 horas / Medio día" :value="old('duration')" required />
+                                <x-text-input type="text" name="duration" id="duration" class="mt-1 block w-full" placeholder="Ej: 3 horas / Medio día" :value="old('duration', $experience->duration)" required />
                                 <x-input-error :messages="$errors->get('duration')" class="mt-1"/>
                             </div>
                         </div>
 
                         {{-- Imagen Principal con Vista Previa --}}
-                        <div x-data="{ imagePreview: null }">
-                            <x-input-label for="image" value="Imagen Principal *" />
+                        <div x-data="{ imagePreview: '{{ $experience->image_path ? Storage::url($experience->image_path) : '' }}' }">
+                            <x-input-label for="image" value="Imagen Principal (Opcional: cambiar)" />
                             <input type="file" name="image" id="image" class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400
                                 file:mr-4 file:py-2 file:px-4
                                 file:rounded-full file:border-0
@@ -80,7 +81,7 @@
                                 file:bg-violet-50 dark:file:bg-violet-900/50 file:text-violet-700 dark:file:text-violet-300
                                 hover:file:bg-violet-100 dark:hover:file:bg-violet-800/50"
                                 accept="image/*"
-                                @change="imagePreview = URL.createObjectURL($event.target.files[0])" required>
+                                @change="imagePreview = URL.createObjectURL($event.target.files[0])">
 
                             {{-- Vista previa --}}
                             <div x-show="imagePreview" class="mt-4">
@@ -88,15 +89,17 @@
                                 <img :src="imagePreview" class="h-48 w-auto rounded-md object-cover border dark:border-gray-600">
                             </div>
 
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sube una foto atractiva que represente tu experiencia (máx 2MB).</p>
-
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sube una nueva foto si deseas reemplazar la actual (máx 2MB).</p>
                             <x-input-error :messages="$errors->get('image')" class="mt-1"/>
                         </div>
 
-                        {{-- Botón de envío --}}
-                        <div class="flex justify-end pt-4">
+                        {{-- Botones --}}
+                        <div class="flex items-center justify-between pt-4">
+                            <a href="{{ route('dashboard') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 underline">
+                                Cancelar
+                            </a>
                             <x-primary-button>
-                                Guardar Experiencia
+                                Actualizar Experiencia
                             </x-primary-button>
                         </div>
                     </form>

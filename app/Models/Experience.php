@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Experience extends Model
 {
@@ -22,6 +23,8 @@ class Experience extends Model
         'location',
         'duration',
         'price',
+        'image_path', // Si tienes imagen
+        'category',
         'includes',
         'not_includes',
     ];
@@ -36,6 +39,7 @@ class Experience extends Model
         return [
             'includes' => 'array',
             'not_includes' => 'array',
+            'price' => 'decimal:2',
         ];
     }
 
@@ -45,5 +49,21 @@ class Experience extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the availability slots for the experience.
+     */
+    public function availabilitySlots(): HasMany
+    {
+        return $this->hasMany(AvailabilitySlot::class)->orderBy('start_time');
+    }
+
+    /**
+     * Get the bookings for the experience.
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
     }
 }

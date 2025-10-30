@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('availability_slot_id')->nullable()->constrained('availability_slots')->onDelete('set null');
             $table->dateTime('booking_date')->nullable()->comment('Fecha y hora seleccionada para la experiencia');
             $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending')->comment('Estado de la reserva');
+            $table->decimal('total_amount', 10, 2)->default(0)->comment('Precio pagado por la reserva');
             // Podríamos añadir más campos como número de personas, precio total si varía, etc.
             // Por ahora, lo mantenemos simple.
             $table->timestamps(); // created_at y updated_at

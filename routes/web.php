@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::patch('/bookings/{booking}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
     Route::patch('/bookings/{booking}/guide-cancel', [BookingController::class, 'guideCancel'])->name('bookings.guideCancel');
+    // Cambia el estado de una reserva (confirmar/cancelar) - para turistas y guías
+    Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
 });
 
 // --- Rutas de Autenticación ---

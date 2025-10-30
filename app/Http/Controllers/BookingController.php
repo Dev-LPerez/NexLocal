@@ -1,123 +1,165 @@
-<?php
+<?php // Filepath: app/Http/Controllers/BookingController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Experience;
+use App\Models\AvailabilitySlot; // <-- Importante
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB; // <-- Importante
 use Carbon\Carbon;
 
 class BookingController extends Controller
 {
     /**
-     * Muestra la página "Mis Reservas" para el turista. (RF-010 - Parte Turista)
+     * Muestra la página "Mis Reservas" para el turista.
      */
     public function index()
     {
-        $user = Auth::user();
-        if (!$user || $user->role !== 'tourist') {
-            abort(403, 'Acceso denegado.');
-        }
-
-        $bookings = Booking::where('user_id', $user->id)
-                            ->with(['experience', 'experience.user'])
-                            ->latest('booking_date')
-                            ->paginate(10);
+        // --- CORRECCIÓN 1: Cargar relaciones ---
+        // Añadimos with() para poder acceder a los datos del slot y la experiencia en la vista
+        $bookings = Booking::where('user_id', Auth::id())
+            ->with(['experience', 'availabilitySlot'])
+            ->latest()
+            ->paginate(10);
 
         return view('bookings.index', compact('bookings'));
     }
 
     /**
-     * Store a newly created booking in storage.
+     * Almacena una nueva reserva.
      */
     public function store(Request $request)
     {
-        // 1. Validar la petición
+        // --- CORRECCIÓN 2: Validación ---
+        // Cambiamos la validación de 'booking_date' a 'availability_slot_id'
         $validatedData = $request->validate([
-            'experience_id' => 'required|exists:experiences,id',
-            'booking_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:' . Carbon::now()->format('Y-m-d\TH:i'),
-        ], [
-            'booking_date.after_or_equal' => 'La fecha y hora de la reserva debe ser futura.',
-            'booking_date.date_format' => 'El formato de fecha y hora no es válido.',
+            'availability_slot_id' => 'required|exists:availability_slots,id',
         ]);
 
-        // 2. Comprobar que el usuario esté autenticado y sea turista
-        $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Debes iniciar sesión para reservar.');
+        $slotId = $validatedData['availability_slot_id'];
+        $userId = Auth::id();
+
+        try {
+            // Usamos una transacción para asegurar que la reserva de cupos sea atómica
+            $booking = DB::transaction(function () use ($slotId, $userId) {
+
+                // Buscamos el slot y lo bloqueamos para evitar que dos usuarios reserven el último cupo
+                $slot = AvailabilitySlot::where('id', $slotId)
+                    ->lockForUpdate() // Previene 'race conditions'
+                    ->first();
+
+                if (!$slot) {
+                    throw new \Exception('El horario seleccionado ya no existe.');
+                }
+
+                $experience = $slot->experience;
+                if (!$experience) {
+                    throw new \Exception('La experiencia asociada a este horario no fue encontrada.');
+                }
+
+                // Verificar si el usuario ya reservó este slot
+                $alreadyBooked = Booking::where('user_id', $userId)
+                    ->where('availability_slot_id', $slotId)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->exists();
+
+                if ($alreadyBooked) {
+                    throw new \Exception('Ya tienes una reserva para este horario.');
+                }
+
+                // --- CORRECCIÓN 3: Lógica de Cupos ---
+                // Verificamos la columna 'available_spots' que es nuestro contador real
+                if ($slot->available_spots <= 0) {
+                    throw new \Exception('Lo sentimos, este horario ya está agotado.');
+                }
+
+                // Descontamos un cupo disponible
+                $slot->decrement('available_spots');
+
+                // Crear la reserva
+                $booking = Booking::create([
+                    'user_id' => $userId,
+                    'experience_id' => $experience->id,
+                    'availability_slot_id' => $slot->id,
+                    'status' => 'confirmed', // Confirmada de inmediato (sin pago)
+                    'total_amount' => $experience->price,
+                    'payment_id' => null,
+                ]);
+
+                return $booking;
+            });
+
+            // Redirigir a "Mis Reservas"
+            return redirect()->route('bookings.index')->with('success', '¡Reserva confirmada con éxito!');
+
+        } catch (\Exception $e) {
+            // Si algo falla (sin cupos, etc.), volvemos con el mensaje de error
+            return redirect()->back()->with('error', $e->getMessage());
         }
-        if ($user->role !== 'tourist') {
-            return back()->with('error', 'Solo los turistas pueden realizar reservas.');
-        }
-
-        // 3. Obtener la experiencia
-        $experience = Experience::findOrFail($validatedData['experience_id']);
-
-        // 4. Crear la reserva
-        Booking::create([
-            'user_id' => $user->id,
-            'experience_id' => $validatedData['experience_id'],
-            'booking_date' => $validatedData['booking_date'],
-            'status' => 'pending',
-        ]);
-
-        return redirect()->route('bookings.index')->with('success', '¡Reserva realizada con éxito para "' . $experience->title . '"!');
     }
 
     /**
-     * Cancela una reserva (acción del Turista).
+     * Actualiza el estado de una reserva (Cancelar/Confirmar por Guía).
      */
-    public function cancel(Booking $booking)
+    public function updateStatus(Request $request, Booking $booking)
     {
-        $user = Auth::user();
-        if (!$user || $user->id !== $booking->user_id) {
+        $request->validate(['status' => 'required|in:confirmed,cancelled']);
+        $newStatus = $request->input('status');
+        $oldStatus = $booking->status; // Guardamos el estado anterior
+
+        $isGuide = Auth::id() === $booking->experience->user_id;
+        $isTourist = Auth::id() === $booking->user_id;
+
+        if (!$isGuide && !($isTourist && $newStatus === 'cancelled')) {
+            abort(403, 'No tienes permiso para modificar esta reserva.');
+        }
+
+        // --- CORRECCIÓN 4: Devolver Cupo ---
+        // Si la reserva se cancela (y no estaba ya cancelada), devolvemos el cupo
+        if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
+            DB::transaction(function () use ($booking, $newStatus) {
+                $booking->update(['status' => $newStatus]);
+
+                // Devolvemos el cupo al slot correspondiente
+                $slot = $booking->availabilitySlot;
+                if ($slot && $slot->start_time > now()) { // Solo devolver cupos de fechas futuras
+                    $slot->increment('available_spots');
+                }
+            });
+            return redirect()->back()->with('success', 'Reserva cancelada.');
+        }
+
+        // Si es el guía confirmando
+        if ($isGuide && $newStatus === 'confirmed' && $oldStatus !== 'confirmed') {
+            $booking->update(['status' => $newStatus]);
+            return redirect()->back()->with('success', 'Reserva confirmada.');
+        }
+
+        return redirect()->back()->with('error', 'No se pudo realizar la acción o no hubo cambios.');
+    }
+
+    /**
+     * Permite al guía cancelar una reserva (cambio de estado a 'cancelled' y devolución de cupo).
+     */
+    public function guideCancel(Request $request, Booking $booking)
+    {
+        // Solo el guía dueño de la experiencia puede cancelar
+        if (Auth::id() !== $booking->experience->user_id) {
             abort(403, 'No tienes permiso para cancelar esta reserva.');
         }
-
-        if (!in_array($booking->status, ['confirmed', 'pending'])) {
-            return back()->with('error', 'No puedes cancelar una reserva que ya está completada o fue cancelada.');
+        if ($booking->status === 'cancelled') {
+            return redirect()->back()->with('warning', 'La reserva ya estaba cancelada.');
         }
-
-        $booking->status = 'cancelled';
-        $booking->save();
-
-        return back()->with('success', 'Reserva cancelada correctamente.');
-    }
-
-    /**
-     * Confirma una reserva (acción del Guía).
-     */
-    public function confirm(Booking $booking)
-    {
-        $user = Auth::user();
-        if (!$user || $user->id !== $booking->experience->user_id) {
-            abort(403, 'No tienes permiso para gestionar esta reserva.');
-        }
-
-        $booking->status = 'confirmed';
-        $booking->save();
-
-        return back()->with('success', 'Reserva confirmada.');
-    }
-
-    /**
-     * Cancela una reserva (acción del Guía).
-     */
-    public function guideCancel(Booking $booking)
-    {
-        $user = Auth::user();
-        if (!$user || $user->id !== $booking->experience->user_id) {
-            abort(403, 'No tienes permiso para gestionar esta reserva.');
-        }
-
-        if (!in_array($booking->status, ['confirmed', 'pending'])) {
-            return back()->with('error', 'No puedes cancelar una reserva que ya está completada o fue cancelada.');
-        }
-
-        $booking->status = 'cancelled';
-        $booking->save();
-
-        return back()->with('success', 'Reserva cancelada (notificación enviada al turista).');
+        DB::transaction(function () use ($booking) {
+            $booking->update(['status' => 'cancelled']);
+            // Devolver cupo al slot
+            $slot = $booking->availabilitySlot;
+            if ($slot && $slot->start_time > now()) {
+                $slot->increment('available_spots');
+            }
+        });
+        return redirect()->back()->with('success', 'Reserva cancelada correctamente por el guía.');
     }
 }

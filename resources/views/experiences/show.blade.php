@@ -1,156 +1,171 @@
 <x-app-layout>
-    <x-slot name="header">
-        <a href="{{ url()->previous() ?? route('home') }}" class="text-sm text-primary dark:text-secondary hover:underline">&larr; Volver</a>
-    </x-slot>
+    <div class="py-12 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-8 px-4">
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+            {{-- Columna Principal: Detalles de la Experiencia --}}
+            <div class="lg:col-span-2 space-y-6">
+
                 {{-- Imagen Principal --}}
-                <img class="w-full h-64 md:h-96 object-cover"
-                     src="{{ $experience->image_path ? Storage::url($experience->image_path) : 'https://placehold.co/1200x400/e9d5ff/8b5cf6?text=Experiencia' }}"
-                     alt="{{ $experience->title }}"
-                     onerror="this.onerror=null; this.src='https://placehold.co/1200x400/e9d5ff/8b5cf6?text=Imagen+No+Disponible';">
+                <div class="relative overflow-hidden rounded-lg shadow-lg" style="padding-bottom: 56.25%;"> {{-- Aspect Ratio 16:9 --}}
+                    <img src="{{ $experience->image_path ? Storage::url($experience->image_path) : 'https://placehold.co/1200x675/e2e8f0/94a3b8?text=NexLocal' }}"
+                         alt="{{ $experience->title }}"
+                         class="absolute top-0 left-0 w-full h-full object-cover">
 
-                <div class="p-6 lg:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {{-- Columna Principal (Información) --}}
-                    <div class="md:col-span-2 space-y-6">
-                        {{-- Título y Categoría --}}
-                        <div>
-                            @if($experience->category)
-                                <span class="inline-block bg-secondary dark:bg-primary/50 text-primary-dark dark:text-secondary px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2">
-                                    {{ $experience->category }}
-                                </span>
-                            @endif
-                            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $experience->title }}</h1>
-                        </div>
+                    {{-- Badge de Categoría --}}
+                    <span class="absolute top-4 left-4 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                        {{ $experience->category }}
+                    </span>
+                </div>
 
-                        {{-- Detalles Rápidos (Iconos) --}}
-                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-gray-600 dark:text-gray-400">
-                            <div class="flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                <span>{{ $experience->location }}</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                <span>{{ $experience->duration }}</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                <span class="font-semibold">${{ number_format($experience->price, 0, ',', '.') }} COP</span> <span class="text-sm">por persona</span>
-                            </div>
-                        </div>
-
-                        {{-- Descripción --}}
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Acerca de esta experiencia</h2>
-                            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ $experience->description }}</p>
-                        </div>
-
-                        {{-- Sección Qué Incluye --}}
-                        @if(!empty($experience->includes))
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">¿Qué incluye?</h2>
-                            <ul class="space-y-2">
-                                @foreach($experience->includes as $item)
-                                <li class="flex items-start">
-                                    <svg class="flex-shrink-0 w-5 h-5 text-green-500 dark:text-green-400 mr-2 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                                    <span class="text-gray-700 dark:text-gray-300">{{ $item }}</span>
-                                </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        @endif
-
-                        {{-- Sección Qué NO Incluye --}}
-                        @if(!empty($experience->not_includes))
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">¿Qué NO incluye?</h2>
-                            <ul class="space-y-2">
-                                @foreach($experience->not_includes as $item)
-                                <li class="flex items-start">
-                                    <svg class="flex-shrink-0 w-5 h-5 text-red-500 dark:text-red-400 mr-2 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                                    <span class="text-gray-700 dark:text-gray-300">{{ $item }}</span>
-                                </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        @endif
-
-                        {{-- Información del Guía --}}
-                        <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">Conoce a tu guía</h2>
-                            <div class="flex items-center gap-4">
-                                {{-- <img src="{{ $experience->user->profile_photo_url ?? 'https://placehold.co/80x80' }}" alt="{{ $experience->user->name }}" class="h-16 w-16 rounded-full object-cover"> --}}
-                                <div>
-                                    <h3 class="font-semibold text-lg text-gray-900 dark:text-white">{{ $experience->user->name ?? 'Guía NexLocal' }}</h3>
-                                    @if($experience->user->identity_verified_at)
-                                        <span class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>
-                                            Identidad Verificada
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Columna Lateral (Reserva) --}}
-                    <div class="md:col-span-1">
-                        <div class="sticky top-24 bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg shadow-md border dark:border-gray-700">
-                            <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">${{ number_format($experience->price, 0, ',', '.') }} <span class="text-base font-normal text-gray-600 dark:text-gray-400">COP / persona</span></h2>
-                            <form action="{{ route('bookings.store') }}" method="POST" class="space-y-4">
-                                @csrf
-                                <input type="hidden" name="experience_id" value="{{ $experience->id }}">
-                                {{-- Selección de Horario (si hay slots) --}}
-                                <div>
-                                    <x-input-label value="Selecciona un horario disponible *" class="mb-2"/>
-                                    @if($experience->availabilitySlots->isNotEmpty())
-                                        <div class="max-h-60 overflow-y-auto space-y-3 pr-2">
-                                            @foreach($experience->availabilitySlots->groupBy(fn($slot) => $slot->start_time->format('Y-m-d')) as $date => $slotsForDate)
-                                                <div class="mb-2">
-                                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                        {{ \Carbon\Carbon::parse($date)->isoFormat('dddd D [de] MMMM') }}
-                                                    </p>
-                                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                        @foreach($slotsForDate as $slot)
-                                                            @php
-                                                                $isAvailable = $slot->is_available;
-                                                                $remaining = $slot->remaining_participants;
-                                                            @endphp
-                                                            <label for="slot_{{ $slot->id }}"
-                                                                class="block p-3 border rounded-md cursor-pointer transition-colors
-                                                                    {{ $isAvailable ? 'border-gray-300 dark:border-gray-600 hover:border-primary dark:hover:border-secondary hover:bg-violet-50 dark:hover:bg-violet-900/30 has-[:checked]:border-primary dark:has-[:checked]:border-secondary has-[:checked]:ring-1 has-[:checked]:ring-primary dark:has-[:checked]:ring-secondary' : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60' }}">
-                                                                <input type="radio" name="availability_slot_id" id="slot_{{ $slot->id }}" value="{{ $slot->id }}" class="sr-only" required @disabled(!$isAvailable)>
-                                                                <span class="block text-sm font-semibold text-center text-gray-800 dark:text-gray-200">{{ $slot->formatted_time }}</span>
-                                                                <span class="block text-xs text-center mt-1 {{ $isAvailable ? 'text-gray-500 dark:text-gray-400' : 'text-red-500 dark:text-red-400 font-medium' }}">
-                                                                    {{ $isAvailable ? ($remaining . ' cupo'.($remaining > 1 ? 's' : '').' disp.') : 'Agotado' }}
-                                                                </span>
-                                                            </label>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">No hay horarios disponibles próximamente.</p>
-                                    @endif
-                                    <x-input-error :messages="$errors->get('availability_slot_id')" class="mt-2"/>
-                                </div>
-                                @if(session('error'))
-                                <div class="mt-4 text-sm text-red-600 dark:text-red-400">
-                                    {{ session('error') }}
-                                </div>
-                                @endif
-                                <x-primary-button class="w-full justify-center !py-3 !text-base" :disabled="$experience->availabilitySlots->isEmpty()">
-                                    {{ $experience->availabilitySlots->isEmpty() ? 'No Disponible' : 'Reservar Ahora (Sin Pago)' }}
-                                </x-primary-button>
-                            </form>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center">Todavía no se te cobrará nada.</p>
-                        </div>
+                {{-- Título y Guía --}}
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">{{ $experience->title }}</h1>
+                    <div class="mt-2 flex items-center space-x-3">
+                        <svg class="h-5 w-5 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-lg text-gray-700 dark:text-gray-300">Ofrecido por <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ $experience->user->name }}</span></span>
                     </div>
                 </div>
+
+                {{-- Detalles Rápidos (Ubicación y Duración) --}}
+                <div class="flex items-center space-x-6 text-gray-600 dark:text-gray-400 border-t border-b dark:border-gray-700 py-4">
+                    <div class="flex items-center space-x-2">
+                        <svg class="h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        </svg>
+                        <span class="text-lg">{{ $experience->location }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-lg">{{ $experience->duration }}</span>
+                    </div>
+                </div>
+
+                {{-- Descripción --}}
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Sobre esta experiencia</h2>
+                    <p class="text-lg text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $experience->description }}</p>
+                </div>
+
+                {{-- Qué Incluye --}}
+                @if(!empty($experience->includes))
+                    <div class="border-t dark:border-gray-700 pt-6">
+                        <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">¿Qué incluye?</h2>
+                        <ul class="space-y-3">
+                            @foreach ($experience->includes as $item)
+                                <li class="flex items-center">
+                                    <svg class="h-6 w-6 text-green-500 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="text-lg text-gray-700 dark:text-gray-300">{{ $item }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- Qué NO Incluye --}}
+                @if(!empty($experience->not_includes))
+                    <div class="border-t dark:border-gray-700 pt-6">
+                        <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">¿Qué NO incluye?</h2>
+                        <ul class="space-y-3">
+                            @foreach ($experience->not_includes as $item)
+                                <li class="flex items-center">
+                                    <svg class="h-6 w-6 text-red-500 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="text-lg text-gray-700 dark:text-gray-300">{{ $item }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
             </div>
+
+            {{-- Columna Lateral: Reserva --}}
+            <div class="lg:col-span-1">
+                <div class="sticky top-28 bg-white dark:bg-gray-800 shadow-xl rounded-lg border dark:border-gray-700 p-6 space-y-5">
+
+                    {{-- Precio --}}
+                    <div class="flex items-baseline text-gray-900 dark:text-gray-100">
+                        <span class="text-4xl font-bold">${{ number_format($experience->price, 0, ',', '.') }}</span>
+                        <span class="ml-1 text-lg text-gray-600 dark:text-gray-400">/ persona</span>
+                    </div>
+
+                    {{-- Formulario de Reserva --}}
+                    @auth
+                        <form action="{{ route('bookings.store') }}" method="POST" class="space-y-4">
+                            @csrf
+
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 border-t dark:border-gray-700 pt-4">Selecciona un horario</h3>
+
+                            {{-- Lista de Horarios Disponibles --}}
+                            <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                                @forelse ($groupedSlots as $date => $slots)
+                                    <div class="space-y-2">
+                                        <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ \Carbon\Carbon::parse($date)->locale('es')->translatedFormat('l, j \de F') }}</p>
+
+                                        @foreach ($slots as $slot)
+                                            <label for="slot_{{ $slot->id }}"
+                                                   class="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:dark:bg-gray-900 has-[:checked]:dark:border-indigo-600 transition-all">
+                                                <div class="flex items-center">
+                                                    <input type="radio" name="availability_slot_id" id="slot_{{ $slot->id }}" value="{{ $slot->id }}" class="text-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-6button dark:bg-gray-700 dark:border-gray-600" required>
+
+                                                    {{-- --- CORRECCIÓN VISUAL 1 --- --}}
+                                                    <span class="ml-3 font-medium text-gray-900 dark:text-gray-100">
+                                                    Hora: {{ $slot->start_time->format('h:i A') }}
+                                                </span>
+                                                </div>
+                                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                                {{-- --- CORRECCIÓN VISUAL 2 --- --}}
+                                                    {{-- Usamos 'available_spots' que es el contador real --}}
+                                                    {{ $slot->available_spots }} cupos disp.
+                                            </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @empty
+                                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">No hay horarios disponibles para esta experiencia por el momento.</p>
+                                @endforelse
+                            </div>
+
+                            <x-input-error :messages="$errors->get('availability_slot_id')" class="mt-1"/>
+
+                            {{-- Mostrar errores generales (ej: "sin cupos", "ya reservado") --}}
+                            @if (session('error'))
+                                <div class="mt-1 text-sm text-red-600 dark:text-red-400 font-medium">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+
+                            @if ($groupedSlots->count() > 0)
+                                <x-primary-button class="w-full text-center justify-center !py-3">
+                                    Reservar Ahora
+                                </x-primary-button>
+                            @else
+                                <x-secondary-button class="w-full text-center justify-center !py-3" disabled>
+                                    No disponible
+                                </x-secondary-button>
+                            @endif
+
+                        </form>
+                    @else
+                        <div class="border-t dark:border-gray-700 pt-4 text-center">
+                            <a href="{{ route('login') }}" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                Inicia sesión
+                            </a>
+                            <span class="text-gray-700 dark:text-gray-300"> para poder reservar.</span>
+                        </div>
+                    @endautH
+                </div>
+            </div>
+
         </div>
     </div>
 </x-app-layout>
+

@@ -1,100 +1,112 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Mis Reservas
+            {{ __('Mis Reservas') }}
         </h2>
     </x-slot>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100 space-y-6">
-                    @if($bookings->isEmpty())
-                        <div class="text-center py-12">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7v3m0 0v3m0-3h3m-3 0H9m12-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No tienes reservas</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Aún no has reservado ninguna experiencia.</p>
-                            <div class="mt-6">
-                                <x-primary-button as="a" :href="route('home')">
-                                    Descubrir Experiencias
-                                </x-primary-button>
-                            </div>
-                        </div>
-                    @else
-                        {{-- Listado de Reservas --}}
-                        <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach ($bookings as $booking)
-                                <div class="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                                    <div class="flex items-center space-x-4">
-                                        <img src="{{ $booking->experience->image_path ? Storage::url($booking->experience->image_path) : 'https://placehold.co/150x100/e9d5ff/8b5cf6?text=Nex' }}"
-                                             alt="{{ $booking->experience->title }}"
-                                             class="w-32 h-20 object-cover rounded-lg">
-                                        <div>
-                                            <a href="{{ route('experiences.show', $booking->experience) }}" class="text-lg font-semibold text-primary dark:text-secondary hover:underline">
-                                                {{ $booking->experience->title }}
-                                            </a>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                                Fecha: <span class="font-medium">
-                                                    @if($booking->booking_date)
-                                                        {{ $booking->booking_date->translatedFormat('d \d\e F \d\e Y, H:i') }}
-                                                    @else
-                                                        Sin fecha asignada
-                                                    @endif
-                                                </span>
-                                            </p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                                Guía: <span class="font-medium">{{ $booking->experience->user->name ?? 'N/A' }}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col sm:items-end space-y-2">
-                                        {{-- Estado --}}
-                                        <div>
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                style="
-                                                    @if($booking->status == 'confirmed') background-color: #bbf7d0; color: #166534; @endif
-                                                    @if($booking->status == 'pending') background-color: #fef9c3; color: #854d0e; @endif
-                                                    @if($booking->status == 'cancelled') background-color: #fecaca; color: #991b1b; @endif
-                                                    @if($booking->status == 'completed') background-color: #dbeafe; color: #1e40af; @endif
-                                                ">
-                                                {{-- Mapeo de estados a español --}}
-                                                @if($booking->status == 'confirmed') Confirmada
-                                                @elseif($booking->status == 'pending') Pendiente
-                                                @elseif($booking->status == 'cancelled') Cancelada
-                                                @elseif($booking->status == 'completed') Completada
-                                                @else {{ ucfirst($booking->status) }}
-                                                @endif
-                                            </span>
-                                        </div>
-                                        {{-- Botón de Cancelar --}}
-                                        @if($booking->status == 'confirmed' || $booking->status == 'pending')
-                                            <form action="{{ route('bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('¿Estás seguro de cancelar esta reserva?');">
-                                                @csrf
-                                                @method('PATCH')
-                                                <x-danger-button type="submit" class="!text-xs !px-3 !py-1.5">
-                                                    Cancelar Reserva
-                                                </x-danger-button>
-                                            </form>
-                                        @endif
-                                        {{-- Futuro: Botón de Escribir Reseña --}}
-                                        {{-- @if($booking->status == 'completed')
-                                            <x-secondary-button as="a" href="#" class="!text-xs !px-3 !py-1.5">
-                                                Escribir Reseña
-                                            </x-secondary-button>
-                                        @endif --}}
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                        {{-- Paginación --}}
-                        <div class="mt-4">
-                            {{ $bookings->links() }}
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+
+                    @if (session('success'))
+                        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative dark:bg-green-900 dark:border-green-600 dark:text-green-300" role="alert">
+                            <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
                     @endif
+                    @if (session('error'))
+                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative dark:bg-red-900 dark:border-red-600 dark:text-red-300" role="alert">
+                            <span class="block sm:inline">{{ session('error') }}</span>
+                        </div>
+                    @endif
+
+                    <h3 class="text-2xl font-semibold mb-6">Tus Próximas Experiencias</h3>
+
+                    @forelse ($bookings as $booking)
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 p-4 border-b dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition duration-150 ease-in-out">
+                            <!-- Imagen de la Experiencia -->
+                            <img class="h-24 w-24 sm:h-20 sm:w-20 object-cover rounded-lg flex-shrink-0"
+                                 src="{{ $booking->experience?->image_path ? Storage::url($booking->experience->image_path) : 'https://placehold.co/100x100/e2e8f0/94a3b8?text=NexLocal' }}"
+                                 alt="{{ $booking->experience?->title ?? 'Experiencia no encontrada' }}">
+
+                            <!-- Detalles de la Reserva -->
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                    <a href="{{ $booking->experience ? route('experiences.show', $booking->experience) : '#' }}" class="hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">
+                                        {{ $booking->experience?->title ?? 'Experiencia Eliminada' }}
+                                    </a>
+                                </h4>
+
+                                {{-- Fecha y Hora del Evento --}}
+                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                    @if ($booking->availabilitySlot)
+                                        <span class="font-medium">Fecha del Evento:</span> {{ $booking->availabilitySlot->start_time->locale('es')->translatedFormat('l, j \de F \de Y - h:i A') }}
+                                    @else
+                                        <span class="font-medium text-red-500">Horario no especificado</span>
+                                    @endif
+                                </p>
+
+                                {{-- Precio Guardado --}}
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium">Precio:</span> ${{ number_format($booking->total_amount, 0, ',', '.') }}
+                                </p>
+
+                                {{-- Fecha de Creación de la Reserva --}}
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{-- Esta es la fecha en que se hizo clic en "Reservar" --}}
+                                    <span class="font-medium">Reservado el:</span> {{ $booking->created_at->locale('es')->translatedFormat('j \de F \de Y, h:i A') }}
+                                </p>
+                            </div>
+
+                            <!-- Estado y Acciones -->
+                            <div class="flex-shrink-0 text-right space-y-2 w-full sm:w-auto">
+                                <div>
+                                    @php
+                                        $statusClasses = [
+                                            'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+                                            'confirmed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+                                            'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+                                            'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+                                        ];
+                                        $statusText = [
+                                            'pending' => 'Pendiente',
+                                            'confirmed' => 'Confirmada',
+                                            'cancelled' => 'Cancelada',
+                                            'completed' => 'Completada',
+                                        ];
+                                    @endphp
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClasses[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                        {{ $statusText[$booking->status] ?? ucfirst($booking->status) }}
+                                    </span>
+                                </div>
+
+                                {{-- Solo mostrar "Cancelar" si la reserva está confirmada O pendiente Y la fecha del evento aún no ha pasado --}}
+                                @if(in_array($booking->status, ['pending', 'confirmed']) && $booking->availabilitySlot && $booking->availabilitySlot->start_time > now())
+                                    <form action="{{ route('bookings.status', $booking) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="cancelled">
+                                        <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">
+                                            Cancelar Reserva
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-center text-gray-500 dark:text-gray-400 py-8">
+                            Aún no tienes ninguna reserva. ¡Anímate a explorar!
+                        </p>
+                    @endforelse
+
+                    <!-- Paginación -->
+                    <div class="mt-8">
+                        {{ $bookings->links() }}
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 </x-app-layout>
-

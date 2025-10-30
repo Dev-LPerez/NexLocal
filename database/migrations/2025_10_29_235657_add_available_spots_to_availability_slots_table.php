@@ -3,8 +3,10 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\AvailabilitySlot; // Importar el modelo para actualizar datos existentes
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */

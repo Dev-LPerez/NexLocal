@@ -18,6 +18,9 @@
 
         <!-- Scripts y Estilos de Vite -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Alpine.js CDN para funcionalidad de formularios -->
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </head>
     <body class="font-sans antialiased bg-background dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <div class="min-h-screen flex flex-col"> {{-- Flex column para footer (si lo hubiera) --}}

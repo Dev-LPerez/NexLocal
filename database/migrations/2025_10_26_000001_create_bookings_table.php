@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->comment('ID del turista que reserva'); // FK a users
             $table->foreignId('experience_id')->constrained()->onDelete('cascade')->comment('ID de la experiencia reservada'); // FK a experiences
-            $table->dateTime('booking_date')->comment('Fecha y hora seleccionada para la experiencia');
+            $table->foreignId('availability_slot_id')->nullable()->constrained('availability_slots')->onDelete('set null');
+            $table->dateTime('booking_date')->nullable()->comment('Fecha y hora seleccionada para la experiencia');
             $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending')->comment('Estado de la reserva');
             // Podríamos añadir más campos como número de personas, precio total si varía, etc.
             // Por ahora, lo mantenemos simple.
@@ -31,4 +32,3 @@ return new class extends Migration
         Schema::dropIfExists('bookings');
     }
 };
-

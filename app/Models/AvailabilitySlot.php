@@ -20,7 +20,7 @@ class AvailabilitySlot extends Model
         'experience_id',
         'start_time',
         'end_time',
-        'max_participants',
+        'max_slots',
         'available_spots',
     ];
 
@@ -53,4 +53,3 @@ class AvailabilitySlot extends Model
         return $this->hasMany(Booking::class);
     }
 }
-

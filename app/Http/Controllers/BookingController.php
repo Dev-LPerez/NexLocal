@@ -35,6 +35,12 @@ class BookingController extends Controller
             // Omitir validación de 'payment_method_id' por ahora
         ]);
 
+        // Prevenir que un guía solicite una reserva
+        $user = Auth::user();
+        if ($user && $user->role === 'guide') {
+            return back()->with('error', 'Los guías no pueden reservar experiencias.');
+        }
+
         $slot = AvailabilitySlot::with('experience')->findOrFail($request->availability_slot_id);
 
         // Verificar si hay cupos disponibles
@@ -109,8 +115,10 @@ class BookingController extends Controller
             // Lógica de Reembolso (pendiente)
             // ...
 
-            // Devolver cupos al slot
-            $booking->availabilitySlot->increment('available_spots', $booking->num_travelers);
+            // Devolver cupos al slot SOLO si $booking->availabilitySlot existe y $booking->num_travelers es numérico y mayor a 0
+            if ($booking->availabilitySlot && is_numeric($booking->num_travelers) && $booking->num_travelers > 0) {
+                $booking->availabilitySlot->increment('available_spots', (int) $booking->num_travelers);
+            }
 
             $booking->status = 'cancelled';
             $booking->save();

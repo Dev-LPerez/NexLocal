@@ -25,6 +25,7 @@ class Booking extends Model
         'payment_status',
         'payment_method',
         'total_amount',
+        'num_travelers', // Asegura que este campo sea asignable
     ];
 
     /**

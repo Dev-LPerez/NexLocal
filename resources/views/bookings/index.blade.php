@@ -62,6 +62,12 @@
                                     {{-- Esta es la fecha en que se hizo clic en "Reservar" --}}
                                     <span class="font-medium">Reservado el:</span> {{ $booking->created_at->locale('es')->translatedFormat('j \de F \de Y, h:i A') }}
                                 </p>
+
+                                {{-- Cantidad de Turistas --}}
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium">Cantidad de Turistas:</span>
+                                    <span>{{ $booking->num_travelers ?? 1 }} {{ Str::plural('turista', $booking->num_travelers ?? 1) }}</span>
+                                </p>
                             </div>
 
                             <!-- Estado y Acciones -->

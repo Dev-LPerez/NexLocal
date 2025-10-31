@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
@@ -45,6 +45,39 @@
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div>
+            <x-input-label for="profile_photo" :value="__('Foto de Perfil')" />
+            <input id="profile_photo" name="profile_photo" type="file" accept="image/*" class="mt-1 block w-full" />
+            @if ($user->profile_photo_path)
+                <img src="{{ asset('storage/' . $user->profile_photo_path) }}" alt="Foto de perfil actual" class="mt-2 w-24 h-24 rounded-full object-cover">
+            @endif
+            <x-input-error class="mt-2" :messages="$errors->get('profile_photo')" />
+        </div>
+
+        <div>
+            <x-input-label for="bio" :value="__('Biografía')" />
+            <textarea id="bio" name="bio" class="mt-1 block w-full" rows="3">{{ old('bio', $user->bio) }}</textarea>
+            <x-input-error class="mt-2" :messages="$errors->get('bio')" />
+        </div>
+
+        <div>
+            <x-input-label for="age" :value="__('Edad')" />
+            <x-text-input id="age" name="age" type="number" min="0" max="120" class="mt-1 block w-full" :value="old('age', $user->age)" />
+            <x-input-error class="mt-2" :messages="$errors->get('age')" />
+        </div>
+
+        <div>
+            <x-input-label for="hobbies" :value="__('Hobbies')" />
+            <textarea id="hobbies" name="hobbies" class="mt-1 block w-full" rows="2">{{ old('hobbies', $user->hobbies) }}</textarea>
+            <x-input-error class="mt-2" :messages="$errors->get('hobbies')" />
+        </div>
+
+        <div>
+            <x-input-label for="occupation" :value="__('¿A qué te dedicas?')" />
+            <x-text-input id="occupation" name="occupation" type="text" class="mt-1 block w-full" :value="old('occupation', $user->occupation)" />
+            <x-input-error class="mt-2" :messages="$errors->get('occupation')" />
         </div>
 
         <div class="flex items-center gap-4">

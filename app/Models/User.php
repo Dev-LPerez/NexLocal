@@ -25,8 +25,11 @@ class User extends Authenticatable {
         'role', // Asegúrate de que 'role' esté aquí
         'identity_document_path',
         'identity_verified_at',
-        'biography',
+        'bio', // corregido a 'bio' para coincidir con la base de datos
         'profile_photo_path',
+        'age',
+        'hobbies',
+        'occupation',
     ];
 
     /**

@@ -21,12 +21,92 @@
                 <div>
                     <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">{{ $experience->title }}</h1>
                     <div class="mt-2 flex items-center space-x-3">
-                        <svg class="h-5 w-5 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                        </svg>
-                        <span class="text-lg text-gray-700 dark:text-gray-300">Ofrecido por <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ $experience->user->name }}</span></span>
+                        @if($experience->user->profile_photo_path)
+                            <img src="{{ asset('storage/' . $experience->user->profile_photo_path) }}" alt="Foto de perfil del guía" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-500">
+                        @endif
+                        <span class="text-lg text-gray-700 dark:text-gray-300">
+                            Ofrecido por
+                            <button type="button" onclick="openGuideModal()" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none bg-transparent border-0 p-0 m-0 align-baseline cursor-pointer">{{ $experience->user->name }}</button>
+                        </span>
+                    </div>
+                    @if($experience->user->bio)
+                        <div class="mt-2 text-gray-600 dark:text-gray-300 text-base line-clamp-2">
+                            {{ $experience->user->bio }}
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Modal Perfil del Guía --}}
+                <div id="guide-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md h-[520px] sm:h-[520px] md:h-[540px] lg:h-[560px] xl:h-[600px] p-0 relative mx-2 sm:mx-0 overflow-hidden flex flex-col">
+                        <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-32 w-full flex items-end justify-center relative shrink-0">
+                            @if($experience->user->profile_photo_path)
+                                <img src="{{ asset('storage/' . $experience->user->profile_photo_path) }}" alt="Foto de perfil del guía" class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-900 shadow-lg">
+                            @endif
+                        </div>
+                        <div class="pt-16 pb-8 px-6 flex-1 flex flex-col items-center overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-200 dark:scrollbar-thumb-indigo-800 scrollbar-track-transparent">
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1 text-center break-words">{{ $experience->user->name }}</h2>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 mb-2">Guía de experiencias</span>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="inline-block bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 text-xs px-3 py-1 rounded-full font-semibold">Verificado</span>
+                                <span class="inline-block bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-200 text-xs px-3 py-1 rounded-full font-semibold">Local</span>
+                            </div>
+                            @if($experience->user->bio)
+                                <p class="text-gray-700 dark:text-gray-300 text-center whitespace-pre-line break-words max-w-full mb-2">{{ $experience->user->bio }}</p>
+                            @endif
+                            <div class="w-full max-w-xs mx-auto text-center space-y-2 mb-4">
+                                @if($experience->user->age)
+                                    <div class="flex items-center justify-center gap-2 text-gray-700 dark:text-gray-300 text-sm">
+                                        <span class="font-semibold">Edad:</span> <span>{{ $experience->user->age }} años</span>
+                                    </div>
+                                @endif
+                                @if($experience->user->hobbies)
+                                    <div class="flex flex-col items-center text-gray-700 dark:text-gray-300 text-sm">
+                                        <span class="font-semibold">Hobbies:</span>
+                                        <span>{{ $experience->user->hobbies }}</span>
+                                    </div>
+                                @endif
+                                @if($experience->user->occupation)
+                                    <div class="flex flex-col items-center text-gray-700 dark:text-gray-300 text-sm">
+                                        <span class="font-semibold">¿A qué te dedicas?</span>
+                                        <span>{{ $experience->user->occupation }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-full">
+                                <div class="flex gap-4 justify-center">
+                                    <button class="flex flex-col items-center group" disabled>
+                                        <span class="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-full">
+                                            <svg class="w-6 h-6 text-indigo-500 group-hover:text-indigo-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                        </span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $experience->user->role === 'guide' ? 'Guía' : 'Turista' }}</span>
+                                    </button>
+                                    <button class="flex flex-col items-center group" disabled>
+                                        <span class="bg-pink-100 dark:bg-pink-900 p-2 rounded-full">
+                                            <svg class="w-6 h-6 text-pink-500 group-hover:text-pink-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                                        </span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">Confiable</span>
+                                    </button>
+                                </div>
+                                <div class="flex gap-2 mt-4">
+                                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-full shadow transition">Seguir</button>
+                                    <button class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold px-4 py-2 rounded-full shadow transition" onclick="closeGuideModal()">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="closeGuideModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-white dark:bg-gray-900 rounded-full p-1 shadow-md z-10">
+                            <svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 18L18 6M6 6l12 12'/></svg>
+                        </button>
                     </div>
                 </div>
+                <script>
+                    function openGuideModal() {
+                        document.getElementById('guide-modal').classList.remove('hidden');
+                    }
+                    function closeGuideModal() {
+                        document.getElementById('guide-modal').classList.add('hidden');
+                    }
+                </script>
 
                 {{-- --- INICIO: SECCIÓN DE CALIFICACIÓN PROMEDIO --- --}}
                 <div class="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
@@ -133,12 +213,15 @@
                         <div class="py-4 border-b dark:border-gray-700 last:border-b-0">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center space-x-3">
-                                    {{-- Placeholder para foto de perfil --}}
-                                    <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                        <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
+                                    @if($review->user && $review->user->profile_photo_path)
+                                        <img src="{{ asset('storage/' . $review->user->profile_photo_path) }}" alt="Foto de perfil del turista" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400">
+                                    @else
+                                        <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                            <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                    @endif
                                     <div>
                                         <span class="font-semibold text-gray-800 dark:text-gray-200">{{ $review->user->name ?? 'Turista' }}</span>
                                         <span class="block text-sm text-gray-500 dark:text-gray-400">{{ $review->created_at->locale('es')->diffForHumans() }}</span>

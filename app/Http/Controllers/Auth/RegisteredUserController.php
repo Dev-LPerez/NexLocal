@@ -33,14 +33,18 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'string', 'in:guide,tourist'], // <-- AÑADE ESTA LÍNEA DE VALIDACIÓN
+            'role' => ['required', 'string', 'in:guide,tourist'],
+            'profile_photo' => ['required', 'image', 'max:2048'],
         ]);
+
+        $profilePhotoPath = $request->file('profile_photo')->store('profile_photos', 'public');
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role, // <-- AÑADE ESTE CAMPO AL CREAR EL USUARIO
+            'role' => $request->role,
+            'profile_photo_path' => $profilePhotoPath,
         ]);
 
         event(new Registered($user));

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
@@ -36,6 +37,8 @@ class Booking extends Model
         return [
             'booking_date' => 'datetime',
             'total_amount' => 'decimal:2',
+            'tourist_confirmed_completed' => 'boolean',
+            'guide_confirmed_completed' => 'boolean',
         ];
     }
 
@@ -61,5 +64,13 @@ class Booking extends Model
     public function availabilitySlot(): BelongsTo
     {
         return $this->belongsTo(AvailabilitySlot::class);
+    }
+
+    /**
+     * Get the review associated with the booking.
+     */
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
     }
 }

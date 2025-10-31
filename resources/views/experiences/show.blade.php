@@ -28,6 +28,23 @@
                     </div>
                 </div>
 
+                {{-- --- INICIO: SECCIÓN DE CALIFICACIÓN PROMEDIO --- --}}
+                <div class="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                    @if ($reviewCount > 0)
+                        <div class="flex items-center space-x-1">
+                            <svg class="h-6 w-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.445a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.539 1.118l-3.367-2.445a1 1 0 00-1.175 0l-3.367 2.445c-.784.57-1.838-.197-1.539-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.07 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path>
+                            </svg>
+                            <span class="text-lg font-bold text-gray-800 dark:text-gray-200">{{ number_format($averageRating, 1) }}</span>
+                        </div>
+                        <span class="text-lg">·</span>
+                        <span class="text-lg">{{ $reviewCount }} reseña(s)</span>
+                    @else
+                        <span class="text-lg">Aún no hay reseñas</span>
+                    @endif
+                </div>
+                {{-- --- FIN: SECCIÓN DE CALIFICACIÓN PROMEDIO --- --}}
+
                 {{-- Detalles Rápidos (Ubicación y Duración) --}}
                 <div class="flex items-center space-x-6 text-gray-600 dark:text-gray-400 border-t border-b dark:border-gray-700 py-4">
                     <div class="flex items-center space-x-2">
@@ -85,6 +102,47 @@
                     </div>
                 @endif
 
+                {{-- --- INICIO: NUEVA SECCIÓN DE RESEÑAS --- --}}
+                <div class="border-t dark:border-gray-700 pt-6">
+                    <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Reseñas de Turistas</h2>
+
+                    @forelse ($experience->reviews as $review)
+                        <div class="py-4 border-b dark:border-gray-700 last:border-b-0">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-3">
+                                    {{-- Placeholder para foto de perfil --}}
+                                    <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <span class="font-semibold text-gray-800 dark:text-gray-200">{{ $review->user->name ?? 'Turista' }}</span>
+                                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ $review->created_at->locale('es')->diffForHumans() }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Estrellas de esta reseña --}}
+                                <div class="flex items-center">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <svg class="h-5 w-5 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.445a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.539 1.118l-3.367-2.445a1 1 0 00-1.175 0l-3.367 2.445c-.784.57-1.838-.197-1.539-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.07 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path>
+                                        </svg>
+                                    @endfor
+                                </div>
+                            </div>
+                            @if($review->comment)
+                                <p class="text-lg text-gray-700 dark:text-gray-300 mt-3">{{ $review->comment }}</p>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="text-center py-8">
+                            <p class="text-gray-500 dark:text-gray-400">Sé el primero en dejar una reseña para esta experiencia.</p>
+                        </div>
+                    @endforelse
+                </div>
+                {{-- --- FIN: NUEVA SECCIÓN DE RESEÑAS --- --}}
+
             </div>
 
             {{-- Columna Lateral: Reserva --}}
@@ -101,6 +159,8 @@
                     @auth
                         <form action="{{ route('bookings.store') }}" method="POST" class="space-y-4">
                             @csrf
+                            {{-- --- AÑADIR INPUT OCULTO PARA EXPERIENCE_ID (Aunque ya lo obtenemos del slot, es buena práctica) --- --}}
+                            <input type="hidden" name="experience_id" value="{{ $experience->id }}">
 
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 border-t dark:border-gray-700 pt-4">Selecciona un horario</h3>
 

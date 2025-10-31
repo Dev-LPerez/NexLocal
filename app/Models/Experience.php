@@ -66,4 +66,13 @@ class Experience extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    /**
+     * Get the reviews for the experience.
+     */
+    public function reviews(): HasMany
+    {
+        // Ordenar para mostrar las más nuevas primero
+        return $this->hasMany(Review::class)->latest();
+    }
 }

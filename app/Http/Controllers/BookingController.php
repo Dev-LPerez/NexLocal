@@ -17,10 +17,10 @@ class BookingController extends Controller
      */
     public function index()
     {
-        // --- CORRECCIÓN 1: Cargar relaciones ---
-        // Añadimos with() para poder acceder a los datos del slot y la experiencia en la vista
+        // --- MODIFICACIÓN: Cargar relación 'review' ---
+        // Añadimos 'review' para saber si ya se dejó una reseña
         $bookings = Booking::where('user_id', Auth::id())
-            ->with(['experience', 'availabilitySlot'])
+            ->with(['experience', 'availabilitySlot', 'review']) // <-- 'review' AÑADIDO
             ->latest()
             ->paginate(10);
 
@@ -62,11 +62,12 @@ class BookingController extends Controller
                 // Verificar si el usuario ya reservó este slot
                 $alreadyBooked = Booking::where('user_id', $userId)
                     ->where('availability_slot_id', $slotId)
-                    ->whereIn('status', ['pending', 'confirmed'])
+                    // --- MODIFICACIÓN: Permitir reservar si está 'cancelled' ---
+                    ->whereIn('status', ['pending', 'confirmed', 'completed']) // No contar 'cancelled'
                     ->exists();
 
                 if ($alreadyBooked) {
-                    throw new \Exception('Ya tienes una reserva para este horario.');
+                    throw new \Exception('Ya tienes una reserva activa o completada para este horario.');
                 }
 
                 // --- CORRECCIÓN 3: Lógica de Cupos ---
@@ -86,6 +87,7 @@ class BookingController extends Controller
                     'status' => 'confirmed', // Confirmada de inmediato (sin pago)
                     'total_amount' => $experience->price,
                     'payment_id' => null,
+                    'booking_date' => $slot->start_time, // <-- AÑADIDO: Guardar la fecha del evento
                 ]);
 
                 return $booking;
@@ -105,14 +107,34 @@ class BookingController extends Controller
      */
     public function updateStatus(Request $request, Booking $booking)
     {
-        $request->validate(['status' => 'required|in:confirmed,cancelled']);
+        // MODIFICACIÓN: Agregar 'in_progress' a los estados permitidos
+        $request->validate(['status' => 'required|in:confirmed,cancelled,in_progress']);
         $newStatus = $request->input('status');
         $oldStatus = $booking->status; // Guardamos el estado anterior
 
         $isGuide = Auth::id() === $booking->experience->user_id;
         $isTourist = Auth::id() === $booking->user_id;
 
-        if (!$isGuide && !($isTourist && $newStatus === 'cancelled')) {
+        // El turista solo puede cancelar
+        if ($isTourist && $newStatus === 'cancelled') {
+
+            // Permitir solo si la reserva está activa
+            if (!in_array($oldStatus, ['pending', 'confirmed'])) {
+
+                return redirect()->back()->with('error', 'No puedes cancelar una reserva que no está activa.');
+            }
+
+            // Y si la fecha del evento aún no ha pasado
+            if ($booking->availabilitySlot && $booking->availabilitySlot->start_time <= now()) {
+                return redirect()->back()->with('error', 'No puedes cancelar una reserva que ya ha comenzado o pasado.');
+            }
+        }
+        // El guía puede confirmar o cancelar
+        else if ($isGuide && in_array($newStatus, ['confirmed', 'cancelled'])) {
+            // Lógica de guía
+        }
+        // Si no es ninguno de los casos
+        else {
             abort(403, 'No tienes permiso para modificar esta reserva.');
         }
 
@@ -124,7 +146,8 @@ class BookingController extends Controller
 
                 // Devolvemos el cupo al slot correspondiente
                 $slot = $booking->availabilitySlot;
-                if ($slot && $slot->start_time > now()) { // Solo devolver cupos de fechas futuras
+                // Solo devolver cupos si el slot existe Y es una fecha futura
+                if ($slot && $slot->start_time > now()) {
                     $slot->increment('available_spots');
                 }
             });
@@ -152,14 +175,58 @@ class BookingController extends Controller
         if ($booking->status === 'cancelled') {
             return redirect()->back()->with('warning', 'La reserva ya estaba cancelada.');
         }
+
+        // No permitir cancelar reservas completadas
+        if ($booking->status === 'completed') {
+            return redirect()->back()->with('error', 'No se puede cancelar una reserva ya completada.');
+        }
+
         DB::transaction(function () use ($booking) {
             $booking->update(['status' => 'cancelled']);
             // Devolver cupo al slot
             $slot = $booking->availabilitySlot;
-            if ($slot && $slot->start_time > now()) {
+            if ($slot && $slot->start_time > now()) { // Solo devolver si es futuro
                 $slot->increment('available_spots');
             }
         });
         return redirect()->back()->with('success', 'Reserva cancelada correctamente por el guía.');
+    }
+
+    /**
+     * Marca una reserva como completada (sistema de finalización de dos pasos).
+     */
+    public function markAsCompleted(Request $request, Booking $booking)
+    {
+        // Verificar permisos (guía o turista)
+        $isGuide = Auth::id() === $booking->experience->user_id;
+        $isTourist = Auth::id() === $booking->user_id;
+
+        if (!$isGuide && !$isTourist) {
+            abort(403, 'No tienes permiso para modificar esta reserva.');
+        }
+
+        // Solo se pueden marcar como completadas las experiencias en progreso
+        if ($booking->status !== 'in_progress') {
+            return redirect()->back()->with('error', 'Solo se pueden marcar como completadas las experiencias en progreso.');
+        }
+
+        // Actualizar la confirmación según quien sea
+        if ($isGuide) {
+            $booking->guide_confirmed_completed = true;
+            $message = 'Has confirmado la finalización. Esperando confirmación del turista.';
+        } elseif ($isTourist) {
+            $booking->tourist_confirmed_completed = true;
+            $message = 'Has confirmado la finalización. Esperando confirmación del guía.';
+        }
+
+        // Si ambos confirmaron, cambiar estado a completed
+        if ($booking->guide_confirmed_completed && $booking->tourist_confirmed_completed) {
+            $booking->status = 'completed';
+            $message = 'Experiencia marcada como completada exitosamente.';
+        }
+
+        $booking->save();
+
+        return redirect()->back()->with('success', $message);
     }
 }

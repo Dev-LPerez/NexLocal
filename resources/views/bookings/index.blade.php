@@ -20,6 +20,11 @@
                             <span class="block sm:inline">{{ session('error') }}</span>
                         </div>
                     @endif
+                    @if (session('warning'))
+                        <div class="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative dark:bg-yellow-900 dark:border-yellow-600 dark:text-yellow-300" role="alert">
+                            <span class="block sm:inline">{{ session('warning') }}</span>
+                        </div>
+                    @endif
 
                     <h3 class="text-2xl font-semibold mb-6">Tus Próximas Experiencias</h3>
 
@@ -80,6 +85,20 @@
                                         {{ $statusText[$booking->status] ?? ucfirst($booking->status) }}
                                     </span>
                                 </div>
+
+                                {{-- --- INICIO: LÓGICA DE RESEÑAS --- --}}
+                                @if($booking->status === 'completed')
+                                    @if($booking->review)
+                                        {{-- El usuario ya dejó una reseña --}}
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Reseña enviada</span>
+                                    @else
+                                        {{-- Botón para dejar reseña --}}
+                                        <a href="{{ route('reviews.create', ['booking_id' => $booking->id]) }}" class="inline-block text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+                                            Dejar Reseña
+                                        </a>
+                                    @endif
+                                @endif
+                                {{-- --- FIN: LÓGICA DE RESEÑAS --- --}}
 
                                 {{-- Solo mostrar "Cancelar" si la reserva está confirmada O pendiente Y la fecha del evento aún no ha pasado --}}
                                 @if(in_array($booking->status, ['pending', 'confirmed']) && $booking->availabilitySlot && $booking->availabilitySlot->start_time > now())

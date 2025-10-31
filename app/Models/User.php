@@ -77,4 +77,12 @@ class User extends Authenticatable {
     {
         return $this->hasManyThrough(Booking::class, Experience::class);
     }
+
+    /**
+     * Get the reviews written by the user (tourist).
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
 }

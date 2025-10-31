@@ -6,6 +6,7 @@ use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReviewController;
 
 // --- Ruta Pública Principal ---
 Route::get('/', [ExperienceController::class, 'index'])->name('home');
@@ -38,11 +39,17 @@ Route::middleware('auth')->group(function () {
     // --- RUTAS PARA GESTIÓN DE RESERVAS ---
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-    Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
-    Route::patch('/bookings/{booking}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
+    // Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel'); // Comentada, usamos 'status'
+    // Route::patch('/bookings/{booking}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm'); // Comentada, usamos 'status'
     Route::patch('/bookings/{booking}/guide-cancel', [BookingController::class, 'guideCancel'])->name('bookings.guideCancel');
     // Cambia el estado de una reserva (confirmar/cancelar) - para turistas y guías
     Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
+    // Marca una reserva como completada (sistema de dos pasos)
+    Route::patch('/bookings/{booking}/mark-completed', [BookingController::class, 'markAsCompleted'])->name('bookings.markAsCompleted');
+
+    // --- NUEVAS RUTAS PARA RESEÑAS ---
+    Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
 // --- Rutas de Autenticación ---

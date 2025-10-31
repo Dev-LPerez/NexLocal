@@ -25,13 +25,13 @@ class DashboardController extends Controller
             // Cargar las experiencias creadas por este guía
             $experiences = $user->experiences()->latest()->get();
 
-            // Cargar las reservas recibidas para las experiencias de este guía
-            $bookings = $user->guideBookings()
-                             ->with(['user', 'experience']) // Cargar el turista (user) y la experiencia
+            // Cargar las reservas recibidas para las experiencias de este guía (con paginación)
+            $guideBookings = $user->guideBookings()
+                             ->with(['user', 'experience', 'availabilitySlot']) // Cargar el turista, experiencia y slot
                              ->latest('booking_date')
-                             ->get();
+                             ->paginate(10);
 
-            return view('dashboard.guide', compact('experiences', 'bookings'));
+            return view('dashboard.guide', compact('experiences', 'guideBookings'));
         }
 
         // --- Panel del Turista ---

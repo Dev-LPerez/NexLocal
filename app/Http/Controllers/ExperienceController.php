@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Arr; // <-- Asegúrate de importar esto
 use Illuminate\Support\Carbon; // <-- Asegúrate de importar esto
+use Illuminate\Support\Facades\DB; // <-- AÑADIR
 
 class ExperienceController extends Controller
 {
@@ -151,26 +152,33 @@ class ExperienceController extends Controller
      */
     public function show(Experience $experience)
     {
+        // --- INICIO: MODIFICACIÓN PARA RESEÑAS ---
         $experience->load([
             'user',
             'availabilitySlots' => function ($query) {
                 $query->where('start_time', '>', now())
-                    ->withCount(['bookings' => function ($q) {
-                        $q->whereIn('status', ['pending', 'confirmed']);
-                    }]);
+                      ->where('available_spots', '>', 0); // Solo slots futuros Y con cupos
+            },
+            // Cargar reseñas y el usuario que la escribió
+            'reviews' => function ($query) {
+                $query->with('user')->latest();
             }
         ]);
 
-        $groupedSlots = $experience->availabilitySlots->filter(function ($slot) {
-            // CORRECCIÓN: Usar max_slots aquí
-            $slot->remaining_participants = $slot->max_slots - $slot->bookings_count;
-            $slot->is_available = $slot->remaining_participants > 0;
-            return $slot->is_available;
-        })->groupBy(function ($slot) {
-            return $slot->start_time->format('Y-m-d');
-        });
+        // Calcular promedio de reseñas
+        // Usamos avg() sobre la colección cargada o con una query para eficiencia
+        $averageRating = $experience->reviews->avg('rating');
+        $reviewCount = $experience->reviews->count();
+        // --- FIN: MODIFICACIÓN PARA RESEÑAS ---
 
-        return view('experiences.show', compact('experience', 'groupedSlots'));
+        // Lógica de agrupación de slots (sin cambios)
+        $groupedSlots = $experience->availabilitySlots
+            ->groupBy(function ($slot) {
+                return $slot->start_time->format('Y-m-d');
+            });
+
+        // Pasamos los nuevos datos a la vista
+        return view('experiences.show', compact('experience', 'groupedSlots', 'averageRating', 'reviewCount'));
     }
 
 

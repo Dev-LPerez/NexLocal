@@ -68,6 +68,29 @@
                     <p class="text-lg text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $experience->description }}</p>
                 </div>
 
+                @if($experience->meeting_point_lat && $experience->meeting_point_lng)
+                    <div class="border-t dark:border-gray-700 pt-6">
+                        <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Punto de Encuentro</h2>
+
+                        @if($experience->meeting_point_name)
+                            <p class="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">
+                                {{ $experience->meeting_point_name }}
+                            </p>
+                        @endif
+
+                        <div id="show-map" class="w-full h-80 rounded-lg border dark:border-gray-700 overflow-hidden"></div>
+
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ $experience->meeting_point_lat }},{{ $experience->meeting_point_lng }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="inline-block mt-3 text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
+                            Ver en Google Maps
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                    </div>
+                @endif
                 {{-- Qué Incluye --}}
                 @if(!empty($experience->includes))
                     <div class="border-t dark:border-gray-700 pt-6">
@@ -234,4 +257,35 @@
 
         </div>
     </div>
+
+    @push('scripts')
+        @if($experience->meeting_point_lat && $experience->meeting_point_lng)
+            <script>
+                function initShowMap() {
+                    const location = {
+                        lat: {{ (float)$experience->meeting_point_lat }},
+                        lng: {{ (float)$experience->meeting_point_lng }}
+                    };
+
+                    const map = new google.maps.Map(document.getElementById('show-map'), {
+                        center: location,
+                        zoom: 16,
+                        disableDefaultUI: true, // Oculta controles para un look más limpio
+                        gestureHandling: 'none', // No permite zoom ni paneo
+                        clickableIcons: false
+                    });
+
+                    new google.maps.Marker({
+                        position: location,
+                        map: map,
+                        title: '{{ addslashes($experience->meeting_point_name ?? "Punto de Encuentro") }}'
+                    });
+                }
+            </script>
+
+            <script async defer
+                    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMpMyjTMPg7JWsAT4s9UpAPjT6cjvxBjk&callback=initShowMap">
+            </script>
+        @endif
+    @endpush
 </x-app-layout>

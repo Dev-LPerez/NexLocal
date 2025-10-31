@@ -88,6 +88,12 @@ class ExperienceController extends Controller
             'slots' => 'nullable|array',
             'slots.*.start_time' => 'required|date|after_or_equal:now',
             'slots.*.max_slots' => 'required|integer|min:1',
+
+            // --- VALIDACIÓN AÑADIDA ---
+            'meeting_point_name' => 'nullable|string|max:255',
+            'meeting_point_lat' => 'nullable|numeric|between:-90,90',
+            'meeting_point_lng' => 'nullable|numeric|between:-180,180',
+            // --- FIN DE VALIDACIÓN AÑADIDA ---
         ]);
 
         $validatedData['user_id'] = Auth::id();
@@ -104,7 +110,7 @@ class ExperienceController extends Controller
 
         // Usar transacción para asegurar consistencia
         DB::transaction(function () use ($validatedData, $slotsData) {
-            $experience = Experience::create($validatedData);
+            $experience = Experience::create($validatedData); // $validatedData ya incluye los campos del mapa
 
             if (!empty($slotsData)) {
                 foreach ($slotsData as $slotData) {
@@ -185,6 +191,12 @@ class ExperienceController extends Controller
             'slots.*.id' => 'nullable|exists:availability_slots,id',
             'slots.*.start_time' => 'required|date',
             'slots.*.max_slots' => 'required|integer|min:1',
+
+            // --- VALIDACIÓN AÑADIDA ---
+            'meeting_point_name' => 'nullable|string|max:255',
+            'meeting_point_lat' => 'nullable|numeric|between:-90,90',
+            'meeting_point_lng' => 'nullable|numeric|between:-180,180',
+            // --- FIN DE VALIDACIÓN AÑADIDA ---
         ]);
 
         if ($request->hasFile('image')) {
@@ -202,7 +214,7 @@ class ExperienceController extends Controller
 
         // Usar transacción para asegurar consistencia
         DB::transaction(function () use ($experience, $validatedData, $slotsData) {
-            $experience->update($validatedData);
+            $experience->update($validatedData); // $validatedData ya incluye los campos del mapa
 
             $existingSlotIds = $experience->availabilitySlots->pluck('id')->all();
             $incomingSlotIds = [];
@@ -304,4 +316,3 @@ class ExperienceController extends Controller
         return array_filter(array_map('trim', explode("\n", $text)));
     }
 }
-

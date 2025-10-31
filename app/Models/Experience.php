@@ -27,6 +27,12 @@ class Experience extends Model
         'category',
         'includes',
         'not_includes',
+
+        // --- CAMPOS AÑADIDOS ---
+        'meeting_point_name',
+        'meeting_point_lat',
+        'meeting_point_lng',
+        // --- FIN DE CAMPOS AÑADIDOS ---
     ];
 
     /**
@@ -40,6 +46,11 @@ class Experience extends Model
             'includes' => 'array',
             'not_includes' => 'array',
             'price' => 'decimal:2',
+
+            // --- CASTS AÑADIDOS ---
+            'meeting_point_lat' => 'decimal:7',
+            'meeting_point_lng' => 'decimal:7',
+            // --- FIN DE CASTS AÑADIDOS ---
         ];
     }
 

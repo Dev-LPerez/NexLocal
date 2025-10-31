@@ -20,7 +20,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('experiences.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" x-data="imageUploadForm()">
+                    <form action="{{ route('experiences.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" x-data="experienceForm()">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -60,6 +60,30 @@
                                 <x-text-input type="text" name="duration" id="duration" class="mt-1 block w-full" placeholder="Ej: 3 horas / Medio día" :value="old('duration')" required />
                                 <x-input-error :messages="$errors->get('duration')" class="mt-1"/>
                             </div>
+                        </div>
+
+                        <div class="space-y-4 pt-4 border-t dark:border-gray-700">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Punto de Encuentro (Opcional)</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Define un lugar exacto para encontrar a los turistas. Puedes buscar un lugar o hacer clic en el mapa.</p>
+
+                            <div>
+                                <x-input-label for="meeting_point_name" value="Nombre del Punto de Encuentro" />
+                                <x-text-input type="text" name="meeting_point_name" id="meeting_point_name" class="mt-1 block w-full" placeholder="Ej: Entrada principal del Parque" :value="old('meeting_point_name')" />
+                                <x-input-error :messages="$errors->get('meeting_point_name')" class="mt-1"/>
+                            </div>
+
+                            <div>
+                                <x-input-label for="map_search" value="Buscar dirección" />
+                                <x-text-input type="text" id="map_search" class="mt-1 block w-full" placeholder="Buscar en Google Maps..."/>
+                            </div>
+
+                            <div id="map" class="w-full h-96 rounded-md border dark:border-gray-700"></div>
+
+                            <input type="hidden" name="meeting_point_lat" id="meeting_point_lat" value="{{ old('meeting_point_lat') }}">
+                            <input type="hidden" name="meeting_point_lng" id="meeting_point_lng" value="{{ old('meeting_point_lng') }}">
+
+                            <x-input-error :messages="$errors->get('meeting_point_lat')" class="mt-1"/>
+                            <x-input-error :messages="$errors->get('meeting_point_lng')" class="mt-1"/>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -123,21 +147,113 @@
     </div>
 
     @push('scripts')
-    <script>
-        function imageUploadForm() {
-            return {
-                imagePreview: '',
-                previewImage(event) {
-                    const input = event.target;
-                    if (input.files && input.files[0]) {
-                        this.imagePreview = URL.createObjectURL(input.files[0]);
-                    } else {
-                        this.imagePreview = '';
+        <script>
+            function experienceForm() { // Renombrado de imageUploadForm a experienceForm
+                return {
+                    imagePreview: '',
+                    previewImage(event) {
+                        const input = event.target;
+                        if (input.files && input.files[0]) {
+                            this.imagePreview = URL.createObjectURL(input.files[0]);
+                        } else {
+                            this.imagePreview = '';
+                        }
+                    },
+                    // Corregido para manejar correctamente old('slots')
+                    slots: @json(old('slots') ? collect(old('slots')) : [['start_time' => '', 'max_slots' => 10]])
+                };
+            }
+
+            // --- INICIO: SCRIPT DE GOOGLE MAPS ---
+
+            let map;
+            let marker;
+            // Ubicación por defecto (Montería, Córdoba)
+            const defaultLocation = { lat: 8.74798, lng: -75.88143 };
+
+            function initMap() {
+                const latInput = document.getElementById('meeting_point_lat');
+                const lngInput = document.getElementById('meeting_point_lng');
+
+                // Revisa si hay valores antiguos (por error de validación)
+                const oldLat = parseFloat(latInput.value);
+                const oldLng = parseFloat(lngInput.value);
+
+                const initialLocation = (oldLat && oldLng && !isNaN(oldLat) && !isNaN(oldLng)) ? { lat: oldLat, lng: oldLng } : defaultLocation;
+
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: initialLocation,
+                    zoom: 13,
+                });
+
+                marker = new google.maps.Marker({
+                    position: initialLocation,
+                    map: map,
+                    draggable: true // Permitir arrastrar el marcador
+                });
+
+                // Si no había valor antiguo, no poner el marcador hasta el primer clic
+                if (!oldLat || !oldLng || isNaN(oldLat) || isNaN(oldLng)) {
+                    marker.setPosition(null); // Oculta el marcador inicial si no hay 'old'
+                }
+
+                // Actualizar inputs cuando el marcador se arrastra
+                google.maps.event.addListener(marker, 'dragend', function() {
+                    updateInputs(marker.getPosition());
+                });
+
+                // Actualizar inputs cuando se hace clic en el mapa
+                google.maps.event.addListener(map, 'click', function(event) {
+                    if (!marker.getPosition()) { // Si es el primer clic, crea el marcador
+                        marker.setPosition(event.latLng);
+                    } else { // Si ya existe, solo lo mueve
+                        marker.setPosition(event.latLng);
                     }
-                },
-                slots: [{ start_time: '', max_slots: 10 }]
-            };
-        }
-    </script>
+                    updateInputs(event.latLng);
+                });
+
+                // --- Autocompletado de Google Places ---
+                const searchInput = document.getElementById('map_search');
+                const autocomplete = new google.maps.places.Autocomplete(searchInput);
+                autocomplete.bindTo('bounds', map); // Sesgar resultados a la vista del mapa
+
+                autocomplete.addListener('place_changed', () => {
+                    const place = autocomplete.getPlace();
+                    if (!place.geometry || !place.geometry.location) {
+                        // El usuario introdujo algo que no se pudo geolocalizar
+                        window.alert("No se encontraron detalles para: '" + place.name + "'");
+                        return;
+                    }
+
+                    // Si el lugar tiene geometría, centrar el mapa y mover el marcador
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(17);
+
+                    if (!marker.getPosition()) {
+                        marker.setPosition(place.geometry.location);
+                    } else {
+                        marker.setPosition(place.geometry.location);
+                    }
+                    updateInputs(place.geometry.location);
+
+                    // Actualizar el nombre del punto de encuentro si está vacío
+                    const nameInput = document.getElementById('meeting_point_name');
+                    if (nameInput.value === '') {
+                        nameInput.value = place.name;
+                    }
+                });
+            }
+
+            function updateInputs(latLng) {
+                document.getElementById('meeting_point_lat').value = latLng.lat();
+                document.getElementById('meeting_point_lng').value = latLng.lng();
+            }
+
+            // --- FIN: SCRIPT DE GOOGLE MAPS ---
+        </script>
+
+        <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMpMyjTMPg7JWsAT4s9UpAPjT6cjvxBjk&libraries=places&callback=initMap">
+        </script>
     @endpush
 </x-app-layout>

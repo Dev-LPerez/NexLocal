@@ -1,9 +1,43 @@
+<?php // la ruta del el archivo del codigo: resources/views/experiences/edit.blade.php ?>
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             Editar Experiencia: {{ $experience->title }}
         </h2>
     </x-slot>
+
+    {{-- v-- ESTA ES LA CORRECCIÓN --v --}}
+    {{-- Definimos los datos y la función de Alpine ANTES de que se use en el x-data --}}
+    @php
+        // Pre-procesamos la variable $slotsData para Alpine.js
+        $slotsData = $experience->availabilitySlots->isNotEmpty()
+            ? $experience->availabilitySlots->map(fn($slot) => [
+                'id' => $slot->id,
+                'start_time' => $slot->start_time->format('Y-m-d\TH:i'), // Formato correcto para datetime-local
+                'max_slots' => $slot->max_slots
+            ])
+            : [[ 'id' => null, 'start_time' => '', 'max_slots' => 10 ]]; // Valor por defecto si no hay slots
+    @endphp
+
+    <script>
+        function imageUploadForm() {
+            return {
+                // Establece la imagen actual si existe, de lo contrario, string vacío
+                imagePreview: '{{ $experience->image_path ? Storage::url($experience->image_path) : '' }}',
+
+                previewImage(event) {
+                    const input = event.target;
+                    if (input.files && input.files[0]) {
+                        this.imagePreview = URL.createObjectURL(input.files[0]);
+                    }
+                },
+
+                // Usamos la variable $slotsData pre-procesada en PHP
+                slots: @json($slotsData)
+            };
+        }
+    </script>
+    {{-- ^-- FIN DE LA CORRECCIÓN --^ --}}
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
@@ -22,11 +56,10 @@
                         </div>
                     @endif
 
-                    <form action="{{ route($experience->exists ? 'experiences.update' : 'experiences.store', $experience->exists ? $experience : null) }}" method="POST" enctype="multipart/form-data" class="space-y-6" x-data="imageUploadForm()">
+                    {{-- Ahora el x-data="imageUploadForm()" encontrará la función --}}
+                    <form action="{{ route('experiences.update', $experience) }}" method="POST" enctype="multipart/form-data" class="space-y-6" x-data="imageUploadForm()">
                         @csrf
-                        @if($experience->exists)
-                            @method('PUT')
-                        @endif
+                        @method('PUT')
 
                         {{-- Título y Categoría --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -92,7 +125,7 @@
 
                         {{-- Imagen Principal con Vista Previa --}}
                         <div>
-                            <x-input-label for="image" value="Imagen Principal {{ $experience->exists ? '(Opcional: cambiar)' : '*' }}" />
+                            <x-input-label for="image" value="Imagen Principal (Opcional: cambiar)" />
                             <input type="file" name="image" id="image" class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400
                                 file:mr-4 file:py-2 file:px-4
                                 file:rounded-full file:border-0
@@ -100,45 +133,40 @@
                                 file:bg-violet-50 dark:file:bg-violet-900/50 file:text-violet-700 dark:file:text-violet-300
                                 hover:file:bg-violet-100 dark:hover:file:bg-violet-800/50"
                                    accept="image/*"
-                                   @change="previewImage($event)" {{ $experience->exists ? '' : 'required' }}>
+                                   @change="previewImage($event)">
 
                             <div x-show="imagePreview" class="mt-4">
                                 <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vista Previa:</span>
                                 <img :src="imagePreview" class="h-48 w-auto rounded-md object-cover border dark:border-gray-600">
                             </div>
 
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sube una foto atractiva que represente tu experiencia (máx 2MB).</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sube una foto atractiva si deseas reemplazar la actual (máx 2MB).</p>
                             <x-input-error :messages="$errors->get('image')" class="mt-1"/>
                         </div>
 
-                        {{-- HORARIOS DISPONIBLES (SECCIÓN CORREGIDA) --}}
+                        {{-- HORARIOS DISPONIBLES --}}
                         <div class="space-y-4 pt-4 border-t dark:border-gray-700">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Horarios Disponibles</h3>
                             <p class="text-sm text-gray-600 dark:text-gray-400">Añade o edita las fechas y horas específicas en que ofreces esta experiencia.</p>
 
                             <div class="space-y-3">
+                                {{-- Ahora esto funcionará --}}
                                 <template x-for="(slot, index) in slots" :key="index">
                                     <div class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-md border dark:border-gray-700">
                                         <input type="hidden" x-bind:name="`slots[${index}][id]`" x-model="slot.id">
 
                                         <div class="flex-1">
-                                            {{-- CORRECCIÓN: Usar x-bind:for y template literals (`) --}}
                                             <x-input-label x-bind:for="`slot_start_time_${index}`" value="Fecha y Hora de Inicio *" />
                                             <x-text-input type="datetime-local"
-                                                          {{-- CORRECCIÓN: Usar x-bind:name y template literals (`) --}}
                                                           x-bind:name="`slots[${index}][start_time]`"
-                                                          {{-- CORRECCIÓN: Usar x-bind:id y template literals (`) --}}
                                                           x-bind:id="`slot_start_time_${index}`"
                                                           class="mt-1 block w-full"
                                                           x-model="slot.start_time" required />
                                         </div>
                                         <div class="w-1/4">
-                                            {{-- CORRECCIÓN: Usar x-bind:for y template literals (`) --}}
                                             <x-input-label x-bind:for="`slot_max_slots_${index}`" value="Cupos *" />
                                             <x-text-input type="number"
-                                                          {{-- CORRECCIÓN: Usar x-bind:name y template literals (`) --}}
                                                           x-bind:name="`slots[${index}][max_slots]`"
-                                                          {{-- CORRECCIÓN: Usar x-bind:id y template literals (`) --}}
                                                           x-bind:id="`slot_max_slots_${index}`"
                                                           class="mt-1 block w-full" min="1"
                                                           x-model="slot.max_slots" required />
@@ -152,11 +180,11 @@
                                 </template>
                             </div>
 
+                            {{-- Y esto también funcionará --}}
                             <x-secondary-button type="button" @click="slots.push({ id: null, start_time: '', max_slots: 10 })">
                                 + Agregar Horario
                             </x-secondary-button>
                         </div>
-                        {{-- FIN SECCIÓN CORREGIDA --}}
 
                         {{-- Botones --}}
                         <div class="flex items-center justify-between pt-4 border-t dark:border-gray-700">
@@ -174,25 +202,5 @@
     </div>
 </x-app-layout>
 
-@push('scripts')
-<script>
-function imageUploadForm() {
-    return {
-        imagePreview: '{{ isset($experience) && $experience->image_path ? Storage::url($experience->image_path) : '' }}',
-        previewImage(event) {
-            const input = event.target;
-            if (input.files && input.files[0]) {
-                this.imagePreview = URL.createObjectURL(input.files[0]);
-            } else {
-                this.imagePreview = '';
-            }
-        },
-        slots: @json(isset($experience) ? $experience->availabilitySlots->map(fn($slot) => [
-            'id' => $slot->id,
-            'start_time' => $slot->start_time->format('Y-m-d\\TH:i'),
-            'max_slots' => $slot->max_slots
-        ]) : [[ 'start_time' => '', 'max_slots' => 10 ]])
-    };
-}
-</script>
-@endpush
+{{-- Ya no se necesita el @push('scripts') ni el @php al final --}}
+

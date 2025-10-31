@@ -203,6 +203,13 @@
                                 </div>
                             @endif
 
+                            {{-- Campo para número de viajeros --}}
+                            <div>
+                                <label for="num_travelers" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad de viajeros</label>
+                                <input type="number" name="num_travelers" id="num_travelers" min="1" value="{{ old('num_travelers', 1) }}" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm">
+                                <x-input-error :messages="$errors->get('num_travelers')" class="mt-1"/>
+                            </div>
+
                             @if ($groupedSlots->count() > 0)
                                 <x-primary-button class="w-full text-center justify-center !py-3">
                                     Reservar Ahora
@@ -228,4 +235,3 @@
         </div>
     </div>
 </x-app-layout>
-

@@ -73,12 +73,14 @@
                                             'confirmed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
                                             'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
                                             'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+                                            'in_progress' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
                                         ];
                                         $statusText = [
                                             'pending' => 'Pendiente',
                                             'confirmed' => 'Confirmada',
                                             'cancelled' => 'Cancelada',
                                             'completed' => 'Completada',
+                                            'in_progress' => 'En Progreso',
                                         ];
                                     @endphp
                                     <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClasses[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
@@ -108,6 +110,17 @@
                                         <input type="hidden" name="status" value="cancelled">
                                         <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">
                                             Cancelar Reserva
+                                        </button>
+                                    </form>
+                                @endif
+
+                                {{-- Mostrar botón para marcar como completada si está en progreso y falta la confirmación del turista --}}
+                                @if($booking->status === 'in_progress' && !$booking->tourist_confirmed_completed)
+                                    <form action="{{ route('bookings.markAsCompleted', $booking) }}" method="POST" onsubmit="return confirm('¿Deseas marcar esta experiencia como completada?');">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                                            Marcar como Completada
                                         </button>
                                     </form>
                                 @endif

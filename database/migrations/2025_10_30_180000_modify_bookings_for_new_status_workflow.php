@@ -12,18 +12,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Para SQLite, necesitamos recrear la tabla con las nuevas columnas
-        // SQLite no soporta ALTER COLUMN ni ENUM directamente
-
         Schema::table('bookings', function (Blueprint $table) {
-            // Agregar las nuevas columnas booleanas para el sistema de finalización de dos pasos
-            $table->boolean('tourist_confirmed_completed')->default(false)->after('status');
-            $table->boolean('guide_confirmed_completed')->default(false)->after('tourist_confirmed_completed');
+            // Añadir columnas de pago si no existen
+            if (!Schema::hasColumn('bookings', 'payment_status')) {
+                $table->string('payment_status')->nullable()->after('total_amount');
+            }
+            if (!Schema::hasColumn('bookings', 'payment_intent_id')) {
+                $table->string('payment_intent_id')->nullable()->after('total_amount');
+            }
+            if (!Schema::hasColumn('bookings', 'paid_at')) {
+                $table->timestamp('paid_at')->nullable()->after('payment_status');
+            }
+            // Añadir columnas booleanas para el sistema de finalización de dos pasos
+            if (!Schema::hasColumn('bookings', 'tourist_confirmed_completed')) {
+                $table->boolean('tourist_confirmed_completed')->default(false)->after('status');
+            }
+            if (!Schema::hasColumn('bookings', 'guide_confirmed_completed')) {
+                $table->boolean('guide_confirmed_completed')->default(false)->after('tourist_confirmed_completed');
+            }
         });
-
-        // En SQLite, la columna 'status' ya permite cualquier string
-        // Solo necesitamos asegurarnos de que los valores sean válidos
-        // Los valores permitidos serán: 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'
     }
 
     /**
@@ -31,10 +38,22 @@ return new class extends Migration
      */
     public function down(): void
     {
-
         Schema::table('bookings', function (Blueprint $table) {
-            $table->dropColumn(['tourist_confirmed_completed', 'guide_confirmed_completed']);
+            if (Schema::hasColumn('bookings', 'payment_status')) {
+                $table->dropColumn('payment_status');
+            }
+            if (Schema::hasColumn('bookings', 'payment_intent_id')) {
+                $table->dropColumn('payment_intent_id');
+            }
+            if (Schema::hasColumn('bookings', 'paid_at')) {
+                $table->dropColumn('paid_at');
+            }
+            if (Schema::hasColumn('bookings', 'tourist_confirmed_completed')) {
+                $table->dropColumn('tourist_confirmed_completed');
+            }
+            if (Schema::hasColumn('bookings', 'guide_confirmed_completed')) {
+                $table->dropColumn('guide_confirmed_completed');
+            }
         });
     }
 };
-

@@ -44,6 +44,26 @@
             <span>{{ $experience->duration }}</span>
         </div>
 
+        {{-- Reseñas --}}
+        <div class="mt-1 flex items-center text-sm text-yellow-500 dark:text-yellow-400">
+            @php
+                $avg = $experience->reviews->avg('rating') ?? 0;
+                $count = $experience->reviews->count();
+            @endphp
+            @if($count > 0)
+                {{-- Estrellas --}}
+                @for($i = 1; $i <= 5; $i++)
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="{{ $i <= round($avg) ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 inline-block">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 17.25l-6.172 3.245 1.179-6.873-5-4.873 6.9-1.002L12 2.25l3.093 6.497 6.9 1.002-5 4.873 1.179 6.873z" />
+                    </svg>
+                @endfor
+                <span class="ml-2 font-medium text-gray-700 dark:text-gray-300">{{ number_format($avg, 1) }}</span>
+                <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">({{ $count }} reseña{{ $count > 1 ? 's' : '' }})</span>
+            @else
+                <span class="text-xs text-gray-400 dark:text-gray-500">Sin reseñas</span>
+            @endif
+        </div>
+
         {{-- Sección "Incluye" (solo si existe y es array) --}}
         @if(!empty($experience->includes) && is_array($experience->includes))
             <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">

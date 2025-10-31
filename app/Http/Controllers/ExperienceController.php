@@ -21,7 +21,16 @@ class ExperienceController extends Controller
     {
         $searchTerm = $request->input('search');
 
-        $query = Experience::with('user')->latest();
+        // --- MODIFICACIÓN AQUÍ ---
+        // Cargamos la relación 'user' y también el conteo de reseñas y el promedio de calificación.
+        // Esto nos dará acceso a:
+        // $experience->reviews_count
+        // $experience->reviews_avg_rating
+        $query = Experience::with('user')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->latest();
+        // --- FIN DE LA MODIFICACIÓN ---
 
         if ($searchTerm) {
             $query->where(function ($q) use ($searchTerm) {
@@ -88,12 +97,9 @@ class ExperienceController extends Controller
             'slots' => 'nullable|array',
             'slots.*.start_time' => 'required|date|after_or_equal:now',
             'slots.*.max_slots' => 'required|integer|min:1',
-
-            // --- VALIDACIÓN AÑADIDA ---
             'meeting_point_name' => 'nullable|string|max:255',
             'meeting_point_lat' => 'nullable|numeric|between:-90,90',
             'meeting_point_lng' => 'nullable|numeric|between:-180,180',
-            // --- FIN DE VALIDACIÓN AÑADIDA ---
         ]);
 
         $validatedData['user_id'] = Auth::id();
@@ -110,7 +116,7 @@ class ExperienceController extends Controller
 
         // Usar transacción para asegurar consistencia
         DB::transaction(function () use ($validatedData, $slotsData) {
-            $experience = Experience::create($validatedData); // $validatedData ya incluye los campos del mapa
+            $experience = Experience::create($validatedData);
 
             if (!empty($slotsData)) {
                 foreach ($slotsData as $slotData) {
@@ -191,12 +197,9 @@ class ExperienceController extends Controller
             'slots.*.id' => 'nullable|exists:availability_slots,id',
             'slots.*.start_time' => 'required|date',
             'slots.*.max_slots' => 'required|integer|min:1',
-
-            // --- VALIDACIÓN AÑADIDA ---
             'meeting_point_name' => 'nullable|string|max:255',
             'meeting_point_lat' => 'nullable|numeric|between:-90,90',
             'meeting_point_lng' => 'nullable|numeric|between:-180,180',
-            // --- FIN DE VALIDACIÓN AÑADIDA ---
         ]);
 
         if ($request->hasFile('image')) {
@@ -214,7 +217,7 @@ class ExperienceController extends Controller
 
         // Usar transacción para asegurar consistencia
         DB::transaction(function () use ($experience, $validatedData, $slotsData) {
-            $experience->update($validatedData); // $validatedData ya incluye los campos del mapa
+            $experience->update($validatedData);
 
             $existingSlotIds = $experience->availabilitySlots->pluck('id')->all();
             $incomingSlotIds = [];

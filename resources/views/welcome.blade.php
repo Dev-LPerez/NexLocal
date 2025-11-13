@@ -1,27 +1,12 @@
 <x-app-layout>
-    <div class="bg-background dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    <div class="bg-background dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex flex-col justify-center items-center">
         <!-- Hero Section -->
-        <section class="relative overflow-hidden pt-24 pb-12 sm:pt-32 sm:pb-16 text-center">
-            {{-- Fondo y patrones (sin cambios) --}}
-            <div class="absolute inset-0 bg-gradient-to-b from-secondary/30 via-background to-background dark:from-primary/30 dark:via-gray-900 dark:to-gray-900"></div>
-            <div class="absolute inset-0 opacity-40"
-                style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c084fc' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='5' cy='5' r='1'/%3E%3Ccircle cx='15' cy='5' r='1'/%3E%3Ccircle cx='25' cy='5' r='1'/%3E%3Ccircle cx='35' cy='5' r='1'/%3E%3Ccircle cx='5' cy='15' r='1'/%3E%3Ccircle cx='15' cy='15' r='1'/%3E%3Ccircle cx='25' cy='15' r='1'/%3E%3Ccircle cx='35' cy='15' r='1'/%3E%3Ccircle cx='5' cy='25' r='1'/%3E%3Ccircle cx='15' cy='25' r='1'/%3E%3Ccircle cx='25' cy='25' r='1'/%3E%3Ccircle cx='35' cy='25' r='1'/%3E%3Ccircle cx='5' cy='35' r='1'/%3E%3Ccircle cx='15' cy='35' r='1'/%3E%3Ccircle cx='25' cy='35' r='1'/%3E%3Ccircle cx='35' cy='35' r='1'/%3E%3C/g%3E%3C/svg%3E&quot;);"></div>
-                style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c084fc' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='5' cy='5' r='1'/%3E%3Ccircle cx='15' cy='5' r='1'/%3E%3Ccircle cx='25' cy='5' r='1'/%3E%3Ccircle cx='35' cy='5' r='1'/%3E%3Ccircle cx='5' cy='15' r='1'/%3E%3Ccircle cx='15' cy='15' r='1'/%3E%3Ccircle cx='25' cy='15' r='1'/%3E%3Ccircle cx='35' cy='15' r='1'/%3E%3Ccircle cx='5' cy='25' r='1'/%3E%3Ccircle cx='15' cy='25' r='1'/%3E%3Ccircle cx='25' cy='25' r='1'/%3E%3Ccircle cx='35' cy='25' r='1'/%3E%3Ccircle cx='5' cy='35' r='1'/%3E%3Ccircle cx='15' cy='35' r='1'/%3E%3Ccircle cx='25' cy='35' r='1'/%3E%3Ccircle cx='35' cy='35' r='1'/%3E%3C/g%3E%3C/svg%3E&quot;);"></div>
+        <section class="relative flex flex-col justify-center items-center w-full pt-8 pb-12 sm:pt-12 sm:pb-16 text-center">
+            {{-- Fondo y patrones eliminados --}}
 
             <div class="relative z-10 mx-auto max-w-4xl px-4">
-                {{-- Títulos y párrafo (sin cambios) --}}
-                <div class="inline-flex animate-pulse items-center gap-2 rounded-full border border-primary/30 bg-secondary/20 px-3 py-1 text-sm font-medium text-primary dark:text-accent">
-                    ✨ Descubre la magia de Córdoba
-                </div>
-                <h1 class="mt-6 text-4xl font-medium tracking-tight sm:text-6xl bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                    Vive Experiencias Únicas en el Corazón del Sinú
-                </h1>
-                <p class="mt-6 mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
-                    Conecta con guías locales, explora la cultura, la gastronomía y los paisajes que hacen de nuestra región un lugar inolvidable.
-                </p>
-
                 <!-- Buscador Funcional (RF-011) -->
-                <div class="mt-10 mx-auto max-w-xl"> {{-- Reducido ancho para enfoque --}}
+                <div class="mb-6 mt-0 mx-auto max-w-xl"> {{-- Barra de búsqueda más arriba --}}
                     <div class="rounded-custom border border-primary/20 bg-white/80 dark:bg-gray-800/80 p-4 shadow-primary-lg backdrop-blur-sm">
                         {{-- Formulario apunta a la ruta 'home' (esta misma página) con método GET --}}
                         <form action="{{ route('home') }}" method="GET" class="flex gap-4">
@@ -39,6 +24,17 @@
                     </div>
                 </div>
 
+                {{-- Títulos y párrafo (sin cambios) --}}
+                <div class="inline-flex animate-pulse items-center gap-2 rounded-full border border-primary/30 bg-secondary/20 px-3 py-1 text-sm font-medium text-primary dark:text-accent mt-2">
+                    ✨ Descubre la magia de Córdoba
+                </div>
+                <h1 class="mt-4 text-3xl font-medium tracking-tight sm:text-5xl bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                    Vive Experiencias Únicas en el Corazón del Sinú
+                </h1>
+                <p class="mt-4 mx-auto max-w-2xl text-base text-gray-600 dark:text-gray-300">
+                    Conecta con guías locales, explora la cultura, la gastronomía y los paisajes que hacen de nuestra región un lugar inolvidable.
+                </p>
+
                 <!-- Tags (sin cambios) -->
                 <div class="mt-8 flex flex-wrap justify-center gap-2 sm:gap-3">
                     <button class="rounded-full border border-primary/20 bg-white/80 px-4 py-1.5 text-sm text-primary transition-colors hover:bg-secondary dark:bg-gray-800/80 dark:hover:bg-primary/20">Río Sinú</button>
@@ -48,20 +44,7 @@
                     <button class="rounded-full border border-primary/20 bg-white/80 px-4 py-1.5 text-sm text-primary transition-colors hover:bg-secondary dark:bg-gray-800/80 dark:hover:bg-primary/20">Naturaleza</button>
                 </div>
             </div>
-            <div class="absolute bottom-0 h-20 w-full bg-gradient-to-t from-background dark:from-gray-900 to-transparent"></div>
-        </section>
-
-        {{-- Sección de Gastronomía (sin cambios) --}}
-        <section class="py-16 sm:py-24">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl font-medium tracking-tight text-center sm:text-4xl bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Delicias que Cuentan Historias</h2>
-                <p class="mt-4 mx-auto max-w-2xl text-center text-lg text-gray-600 dark:text-gray-300">Descubre los sabores auténticos de Montería y Cereté en los lugares preferidos por los locales.</p>
-                <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach($restaurants as $restaurant)
-                        <x-restaurant-card :restaurant="$restaurant"/>
-                    @endforeach
-                </div>
-            </div>
+            {{-- Eliminado el gradiente inferior --}}
         </section>
 
         {{-- Sección de Experiencias (Adaptada para mostrar resultados de búsqueda) --}}
@@ -92,6 +75,18 @@
                             @endif
                         </div>
                     @endforelse
+                </div>
+            </div>
+        </section>
+        <!-- Delicias que Cuentan Historias debajo de Aventuras Inolvidables -->
+        <section class="py-16 sm:py-24">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-medium tracking-tight text-center sm:text-4xl bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Delicias que Cuentan Historias</h2>
+                <p class="mt-4 mx-auto max-w-2xl text-center text-lg text-gray-600 dark:text-gray-300">Descubre los sabores auténticos de Montería y Cereté en los lugares preferidos por los locales.</p>
+                <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach($restaurants as $restaurant)
+                        <x-restaurant-card :restaurant="$restaurant"/>
+                    @endforeach
                 </div>
             </div>
         </section>

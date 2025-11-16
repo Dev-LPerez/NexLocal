@@ -1,10 +1,37 @@
 <x-app-layout>
     <div class="bg-background dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex flex-col justify-center items-center">
         <!-- Hero Section -->
-        <section class="relative flex flex-col justify-center items-center w-full pt-8 pb-12 sm:pt-12 sm:pb-16 text-center">
+        <section class="relative flex flex-col justify-center items-center w-full pt-8 pb-12 sm:pt-12 sm:pb-16 text-center overflow-hidden">
             {{-- Fondo y patrones eliminados --}}
 
-            <div class="relative z-10 mx-auto max-w-4xl px-4">
+            <!-- Video background -->
+            <video id="heroVideo" autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out opacity-100">
+                <source src="{{ asset('videos/Video 4.mp4') }}" type="video/mp4">
+                <!-- Puedes añadir una versión .webm para mejor compatibilidad -->
+                {{-- <source src="{{ asset('videos/hero.webm') }}" type="video/webm"> --}}
+                Tu navegador no soporta video HTML5.
+            </video>
+            <!-- Imagen estática que se muestra cuando el video está pausado (inicia oculta con opacity-0) -->
+            <img id="heroPoster" src="{{ asset('images/Imagen 1.jpeg') }}" alt="Hero poster" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out opacity-0 pointer-events-none" />
+
+            <!-- Botón play/pause (esquina superior derecha) -->
+            <button id="videoToggleBtn" type="button" aria-pressed="false" aria-label="Pausar video"
+                    class="absolute top-4 right-4 z-30 flex items-center justify-center h-10 w-10 rounded-full bg-white/70 dark:bg-gray-800/70 border border-white/20 shadow-sm backdrop-blur-sm transition transform hover:scale-105">
+                <!-- Icono pausa por defecto (se mostrará mientras el video esté reproduciéndose) -->
+                <svg id="iconPause" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-800 dark:text-gray-100">
+                    <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+                    <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+                </svg>
+                <!-- Icono play oculto inicialmente -->
+                <svg id="iconPlay" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden text-gray-800 dark:text-gray-100">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+
+             <!-- Overlay para mejorar legibilidad -->
+             <div class="absolute inset-0 bg-black/25 dark:bg-black/40"></div>
+
+             <div class="relative z-10 mx-auto max-w-4xl px-4">
                 <!-- Buscador Funcional (RF-011) -->
                 <div class="mb-6 mt-0 mx-auto max-w-xl"> {{-- Barra de búsqueda más arriba --}}
                     <div class="rounded-custom border border-primary/20 bg-white/80 dark:bg-gray-800/80 p-4 shadow-primary-lg backdrop-blur-sm">
@@ -31,7 +58,7 @@
                 <h1 class="mt-4 text-3xl font-medium tracking-tight sm:text-5xl bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
                     Vive Experiencias Únicas en el Corazón del Sinú
                 </h1>
-                <p class="mt-4 mx-auto max-w-2xl text-base text-gray-600 dark:text-gray-300">
+                <p class="mt-4 mx-auto max-w-2xl text-base text-white dark:text-white">
                     Conecta con guías locales, explora la cultura, la gastronomía y los paisajes que hacen de nuestra región un lugar inolvidable.
                 </p>
 
@@ -87,6 +114,40 @@
                     @foreach($restaurants as $restaurant)
                         <x-restaurant-card :restaurant="$restaurant"/>
                     @endforeach
+                    {{-- Restaurantes adicionales de ejemplo --}}
+                    <x-restaurant-card :restaurant="[
+                        'name' => 'La Cazuela Sinuana',
+                        'description' => 'Especialidad en cazuelas de mariscos y cocina típica cordobesa.',
+                        'image' => 'images/Cazuela Sinuana.png',
+                        'location' => 'Montería',
+                        'rating' => 4.8,
+                        'category' => 'Típico',
+                        'price_range' => '$$ - $$$',
+                        'hours' => '12:00 - 23:00',
+                        'specialties' => ['Cazuela de mariscos', 'Arroz con coco', 'Pescado frito']
+                    ]"/>
+                    <x-restaurant-card :restaurant="[
+                        'name' => 'El Rincón del Queso',
+                        'description' => 'Quesos artesanales y platos tradicionales de la región.',
+                        'image' => 'images/Rincon del queso.png',
+                        'location' => 'Montería',
+                        'rating' => 4.7,
+                        'category' => 'Lácteos',
+                        'price_range' => '$ - $$',
+                        'hours' => '08:00 - 20:00',
+                        'specialties' => ['Queso costeño', 'Arepas de queso', 'Postres']
+                    ]"/>
+                    <x-restaurant-card :restaurant="[
+                        'name' => 'Sabores del Río',
+                        'description' => 'Pescados frescos y ambiente familiar junto al río Sinú.',
+                        'image' => 'images/Sabores del rio.png',
+                        'location' => 'Montería',
+                        'rating' => 4.9,
+                        'category' => 'Pescados',
+                        'price_range' => '$$ - $$$',
+                        'hours' => '11:00 - 22:00',
+                        'specialties' => ['Mojarra frita', 'Sancocho de pescado', 'Patacones']
+                    ]"/>
                 </div>
             </div>
         </section>
@@ -144,4 +205,80 @@
             </div>
         </footer>
     </div>
+
+    {{-- Script local para controlar reproducción del hero (play/pause e intercambio con poster con transición) --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const video = document.getElementById('heroVideo');
+            const poster = document.getElementById('heroPoster');
+            const btn = document.getElementById('videoToggleBtn');
+            const iconPlay = document.getElementById('iconPlay');
+            const iconPause = document.getElementById('iconPause');
+
+            if (!video || !poster || !btn) return;
+
+            // Actualiza la UI usando clases de opacidad para una transición suave
+            function updateUIPlaying(isPlaying) {
+                if (isPlaying) {
+                    // Mostrar video (fade in) y ocultar poster (fade out)
+                    video.classList.remove('opacity-0', 'pointer-events-none');
+                    video.classList.add('opacity-100');
+                    poster.classList.remove('opacity-100');
+                    poster.classList.add('opacity-0', 'pointer-events-none');
+
+                    iconPlay.classList.add('hidden');
+                    iconPause.classList.remove('hidden');
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.setAttribute('aria-label', 'Pausar video');
+                } else {
+                    // Pausar: fade out video y fade in poster
+                    video.classList.remove('opacity-100');
+                    video.classList.add('opacity-0', 'pointer-events-none');
+                    poster.classList.remove('opacity-0');
+                    poster.classList.add('opacity-100');
+
+                    iconPlay.classList.remove('hidden');
+                    iconPause.classList.add('hidden');
+                    btn.setAttribute('aria-pressed', 'true');
+                    btn.setAttribute('aria-label', 'Reproducir video');
+                }
+            }
+
+            // Intento inicial de reproducir (autoplay puede bloqueado en algunos navegadores)
+            video.play().then(() => {
+                updateUIPlaying(true);
+            }).catch(() => {
+                // fallback: mostrar poster
+                updateUIPlaying(false);
+            });
+
+            btn.addEventListener('click', function () {
+                // Si el video está visible (no opacity-0), lo pausamos y mostramos poster
+                if (!video.classList.contains('opacity-0')) {
+                    video.pause();
+                    // Reiniciar al inicio al pausar para asegurar que el próximo play empiece desde 0
+                    try { video.currentTime = 0; } catch(e) {}
+                    updateUIPlaying(false);
+                } else {
+                    // Reproducir desde el principio
+                    try { video.currentTime = 0; } catch(e) {}
+                    // Intentar reproducir
+                    video.play().then(() => {
+                        updateUIPlaying(true);
+                    }).catch(() => {
+                        // Si falla, mostrar poster
+                        updateUIPlaying(false);
+                    });
+                }
+            });
+
+            // Mantener UI sincronizada si el video se pausa/lee por otros medios
+            video.addEventListener('pause', () => {
+                // Al pausarlo desde controles externos, mostrar poster y reiniciar
+                try { video.currentTime = 0; } catch(e) {}
+                updateUIPlaying(false);
+            });
+            video.addEventListener('play', () => updateUIPlaying(true));
+        });
+    </script>
 </x-app-layout>

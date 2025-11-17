@@ -94,6 +94,12 @@
                 </div>
             </footer> --}}
         </div>
+
+        {{-- Ventanas de Chat estilo Facebook --}}
+        @auth
+            @include('components.chat-windows')
+        @endauth
+
         {{-- Scripts adicionales si son necesarios --}}
         @stack('scripts')
     </body>

@@ -8,6 +8,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ChatController;
 
 // --- Ruta Pública Principal ---
 Route::get('/', [ExperienceController::class, 'index'])->name('home');
@@ -58,6 +59,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    // --- RUTAS PARA CHAT ---
+    Route::get('/chat/conversations', [ChatController::class, 'getConversations'])->name('chat.conversations');
+    Route::get('/chat/{bookingId}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
+    Route::post('/chat/{bookingId}/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::get('/chat/unread-count', [ChatController::class, 'getUnreadCount'])->name('chat.unreadCount');
+    Route::delete('/chat/{bookingId}/conversation', [ChatController::class, 'deleteConversation'])->name('chat.deleteConversation');
 });
 
 // --- Rutas de Autenticación ---

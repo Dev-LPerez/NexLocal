@@ -133,6 +133,18 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-y-2 flex flex-col items-start">
 
+                                            {{-- Botón para abrir chat --}}
+                                            @if(in_array($booking->status, ['pending', 'confirmed', 'in_progress', 'completed']))
+                                                <button type="button"
+                                                        onclick="openChatFromBooking({{ $booking->id }}, '{{ $booking->user->name }}', '{{ $booking->experience->title }}', '{{ $booking->status }}')"
+                                                        class="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                    </svg>
+                                                    Chatear con turista
+                                                </button>
+                                            @endif
+
                                             {{-- --- INICIO: NUEVO BOTÓN Y MODAL --- --}}
                                             <button type="button"
                                                     x-data=""
@@ -281,5 +293,26 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        function openChatFromBooking(bookingId, userName, experienceTitle, bookingStatus) {
+            // Crear objeto de conversación
+            const conversation = {
+                booking_id: bookingId,
+                other_user: {
+                    name: userName
+                },
+                experience_title: experienceTitle,
+                booking_status: bookingStatus
+            };
+
+            // Disparar evento para abrir la ventana de chat
+            window.dispatchEvent(new CustomEvent('open-chat-window', {
+                detail: conversation
+            }));
+        }
+    </script>
+    @endpush
 </x-app-layout>
 

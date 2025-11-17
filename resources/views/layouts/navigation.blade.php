@@ -72,6 +72,87 @@
                 </button>
 
                 @auth
+                    <!-- Chat Dropdown -->
+                    <div x-data="chatDropdown()" class="relative">
+                        <button @click="toggleDropdown()"
+                                class="relative p-2 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition">
+                            <!-- Icono de chat -->
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <!-- Badge con contador de mensajes no leídos -->
+                            <span x-show="unreadCount > 0"
+                                  x-text="unreadCount > 9 ? '9+' : unreadCount"
+                                  class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-600 rounded-full min-w-[1.25rem]">
+                            </span>
+                        </button>
+
+                        <!-- Dropdown de conversaciones -->
+                        <div x-show="open"
+                             @click.away="open = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
+                             style="display: none;">
+                            <div class="py-2">
+                                <!-- Header -->
+                                <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Mensajes</h3>
+                                </div>
+
+                                <!-- Lista de conversaciones -->
+                                <div class="max-h-96 overflow-y-auto">
+                                    <template x-if="conversations.length === 0">
+                                        <div class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            No tienes conversaciones activas
+                                        </div>
+                                    </template>
+
+                                    <template x-for="conversation in conversations" :key="conversation.booking_id">
+                                        <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 transition relative group">
+                                            <div @click="openChatWindow(conversation)" class="flex items-center cursor-pointer">
+                                                <div class="flex-shrink-0">
+                                                    <template x-if="conversation.other_user.profile_photo_path">
+                                                        <img :src="'/storage/' + conversation.other_user.profile_photo_path"
+                                                             :alt="conversation.other_user.name"
+                                                             class="w-10 h-10 rounded-full object-cover">
+                                                    </template>
+                                                    <template x-if="!conversation.other_user.profile_photo_path">
+                                                        <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
+                                                            <span x-text="conversation.other_user.name.charAt(0).toUpperCase()"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="ml-3 flex-1 min-w-0">
+                                                    <div class="flex items-center justify-between">
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" x-text="conversation.other_user.name"></p>
+                                                        <span x-show="conversation.unread_count > 0"
+                                                              class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
+                                                              x-text="conversation.unread_count"></span>
+                                                    </div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate" x-text="conversation.experience_title"></p>
+                                                    <p class="text-xs text-gray-400 dark:text-gray-500 truncate" x-text="conversation.last_message?.message || 'Sin mensajes'"></p>
+                                                </div>
+                                            </div>
+                                            <!-- Botón de eliminar conversación -->
+                                            <button @click.stop="deleteConversation(conversation.booking_id)"
+                                                    class="absolute top-3 right-3 p-1 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    title="Eliminar conversación">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Notificaciones Dropdown -->
                     <div x-data="notificationDropdown()" class="relative">
                         <button @click="toggleDropdown()"
@@ -308,6 +389,87 @@
 </nav>
 
 <script>
+    function chatDropdown() {
+        return {
+            open: false,
+            conversations: [],
+            unreadCount: 0,
+
+            init() {
+                this.loadConversations();
+                // Actualizar conversaciones cada 15 segundos
+                setInterval(() => {
+                    this.loadConversations();
+                }, 15000);
+            },
+
+            toggleDropdown() {
+                this.open = !this.open;
+                if (this.open) {
+                    this.loadConversations();
+                }
+            },
+
+            async loadConversations() {
+                try {
+                    const response = await fetch('{{ route("chat.conversations") }}', {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        }
+                    });
+                    const data = await response.json();
+                    this.conversations = data.conversations;
+
+                    // Calcular total de mensajes no leídos
+                    this.unreadCount = this.conversations.reduce((total, conv) => total + conv.unread_count, 0);
+                } catch (error) {
+                    console.error('Error al cargar conversaciones:', error);
+                }
+            },
+
+            openChatWindow(conversation) {
+                this.open = false;
+                // Disparar evento personalizado para abrir ventana de chat
+                window.dispatchEvent(new CustomEvent('open-chat-window', {
+                    detail: conversation
+                }));
+            },
+
+            async deleteConversation(bookingId) {
+                if (!confirm('¿Estás seguro de que deseas eliminar esta conversación?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/chat/${bookingId}/conversation`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        // Eliminar la conversación de la lista local
+                        this.conversations = this.conversations.filter(c => c.booking_id !== bookingId);
+
+                        // Recalcular contador de no leídos
+                        this.unreadCount = this.conversations.reduce((total, conv) => total + conv.unread_count, 0);
+
+                        // Cerrar la ventana de chat si está abierta
+                        window.dispatchEvent(new CustomEvent('close-chat-window', {
+                            detail: { booking_id: bookingId }
+                        }));
+                    }
+                } catch (error) {
+                    console.error('Error al eliminar conversación:', error);
+                    alert('No se pudo eliminar la conversación. Intenta de nuevo.');
+                }
+            }
+        }
+    }
+
     function notificationDropdown() {
         return {
             open: false,

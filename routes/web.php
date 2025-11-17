@@ -7,6 +7,7 @@ use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\NotificationController;
 
 // --- Ruta Pública Principal ---
 Route::get('/', [ExperienceController::class, 'index'])->name('home');
@@ -50,6 +51,13 @@ Route::middleware('auth')->group(function () {
     // --- NUEVAS RUTAS PARA RESEÑAS ---
     Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+    // --- RUTAS PARA NOTIFICACIONES ---
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
 // --- Rutas de Autenticación ---

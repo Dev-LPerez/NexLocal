@@ -88,4 +88,20 @@ class User extends Authenticatable {
     {
         return $this->hasMany(Review::class);
     }
+
+    /**
+     * Get all notifications for this user.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get unread notifications count.
+     */
+    public function unreadNotificationsCount(): int
+    {
+        return $this->notifications()->where('is_read', false)->count();
+    }
 }

@@ -8,6 +8,7 @@ use App\Models\AvailabilitySlot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Helpers\NotificationHelper;
 
 class BookingController extends Controller
 {
@@ -77,6 +78,9 @@ class BookingController extends Controller
                 'paid_at' => now(),
             ]);
 
+            // Notificar al guía sobre la nueva reserva
+            NotificationHelper::newBookingForGuide($slot->experience->user, $booking);
+
             return redirect()->route('bookings.index')->with('success', '¡Reserva realizada con éxito! Esperando confirmación del guía.');
         }
 
@@ -122,6 +126,14 @@ class BookingController extends Controller
 
             $booking->status = 'cancelled';
             $booking->save();
+
+            // Notificar a ambas partes sobre la cancelación
+            if ($isTourist) {
+                NotificationHelper::bookingCancelled($booking->experience->user, $booking, 'tourist');
+            } elseif ($isGuide) {
+                NotificationHelper::bookingCancelled($booking->user, $booking, 'guide');
+            }
+
             return back()->with('success', 'Reserva cancelada.');
         }
 
@@ -131,6 +143,10 @@ class BookingController extends Controller
             if ($newStatus === 'confirmed' && $booking->status === 'pending') {
                 $booking->status = 'confirmed';
                 $booking->save();
+
+                // Notificar al turista que su reserva fue confirmada
+                NotificationHelper::bookingConfirmed($booking->user, $booking);
+
                 return back()->with('success', 'Reserva confirmada.');
             }
 
@@ -157,6 +173,9 @@ class BookingController extends Controller
             // Verificar si ambas partes han confirmado
             if ($booking->tourist_confirmed_completed && $booking->guide_confirmed_completed) {
                 $booking->status = 'completed';
+
+                // Notificar al turista para que deje una reseña
+                NotificationHelper::bookingCompleted($booking->user, $booking);
             }
 
             $booking->save();

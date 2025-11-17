@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\NotificationHelper;
 
 class ReviewController extends Controller
 {
@@ -65,13 +66,16 @@ class ReviewController extends Controller
         }
 
         // Crear la reseña
-        Review::create([
+        $review = Review::create([
             'user_id' => Auth::id(),
             'experience_id' => $booking->experience_id,
             'booking_id' => $booking->id,
             'rating' => $validated['rating'],
             'comment' => $validated['comment'],
         ]);
+
+        // Notificar al guía sobre la nueva reseña
+        NotificationHelper::newReview($booking->experience->user, $review);
 
         return redirect()->route('bookings.index')->with('success', '¡Gracias por tu reseña!');
     }

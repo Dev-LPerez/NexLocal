@@ -1,13 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# NexLocal
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Plataforma de Experiencias Turísticas Locales**
 
-## About Laravel
+Sistema de reservas y gestión de experiencias turísticas que conecta viajeros con guías locales en Córdoba, Colombia.
+
+---
+
+## 🚀 Características Principales
+
+- **Sistema de Reservas Completo**: Estados (`pending`, `confirmed`, `in_progress`, `completed`, `cancelled`)
+- **Roles de Usuario**: Turistas y Guías con permisos específicos
+- **Gestión de Cupos**: Control automático de disponibilidad
+- **Sistema de Reseñas**: Los turistas pueden valorar experiencias
+- **Búsqueda y Filtros**: Encuentra experiencias por título, ubicación o categoría
+- **Panel de Guía**: Dashboard completo para gestionar reservas
+- **Notificaciones**: Sistema de alertas para turistas y guías
+
+---
+
+## 📚 Documentación
+
+### Sistema de Reservas
+La documentación completa del sistema de estados de reservas está disponible en la carpeta [`docs/`](./docs/):
+
+- **[Manual Completo](./docs/MANUAL_ESTADOS_RESERVAS.md)** - Guía detallada para turistas y guías
+- **[Guía Rápida](./docs/GUIA_RAPIDA_ESTADOS.md)** - Referencia rápida con diagramas visuales
+- **[Ejemplos de Código](./docs/EJEMPLOS_CODIGO_RESERVAS.md)** - Para desarrolladores
+- **[Diagramas de Flujo](./docs/DIAGRAMAS_FLUJO.md)** - Visualizaciones con Mermaid
+
+**Inicio rápido:** Lee primero el [README de docs](./docs/README.md)
+
+---
+
+## 🛠️ Tecnologías
+
+- **Backend**: Laravel 12.x
+- **Frontend**: Blade Templates + Tailwind CSS
+- **Base de datos**: SQLite (desarrollo) / MySQL (producción)
+- **Testing**: Pest PHP
+- **Autenticación**: Laravel Breeze
+
+---
+
+## 📋 Requisitos
+
+- PHP >= 8.2
+- Composer
+- Node.js & npm
+- SQLite/MySQL
+
+---
+
+## 🚦 Instalación
+
+```bash
+# Clonar repositorio
+git clone https://github.com/tu-usuario/nexlocal.git
+cd nexlocal
+
+# Instalar dependencias PHP
+composer install
+
+# Instalar dependencias JavaScript
+npm install
+
+# Configurar entorno
+cp .env.example .env
+php artisan key:generate
+
+# Ejecutar migraciones
+php artisan migrate --seed
+
+# Compilar assets
+npm run build
+
+# Iniciar servidor
+php artisan serve
+```
+
+Accede a la aplicación en `http://localhost:8000`
+
+---
+
+## 🧪 Testing
+
+```bash
+# Ejecutar todos los tests
+php artisan test
+
+# Con coverage
+php artisan test --coverage
+
+# Tests específicos
+php artisan test --filter=BookingTest
+```
+
+---
+
+## 📖 About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 

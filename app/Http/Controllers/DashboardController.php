@@ -35,9 +35,9 @@ class DashboardController extends Controller
         }
 
         // --- Panel del Turista ---
-        // Redirigimos al turista a su página dedicada "Mis Reservas"
+        // Para turistas mostramos la página principal de experiencias en lugar de "Mis Reservas"
         if ($user->role === 'tourist') {
-            return redirect()->route('bookings.index');
+            return redirect()->route('home');
         }
 
         // --- Fallback (ej. para Admin o si el rol no está definido) ---

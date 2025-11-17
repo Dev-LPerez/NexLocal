@@ -2,7 +2,7 @@
 
 <div class="group relative overflow-hidden rounded-custom bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 hover:shadow-primary-lg hover:-translate-y-1">
     <img class="h-56 w-full object-cover transition-transform duration-300 group-hover:scale-105" src="{{ $restaurant['image'] }}" alt="{{ $restaurant['name'] }}">
-    
+
     <!-- Badges Superiores -->
     <div class="absolute top-3 left-3">
         <span class="rounded-full bg-secondary/80 px-2 py-1 text-xs font-medium text-primary-dark backdrop-blur-sm">{{ $restaurant['category'] }}</span>
@@ -14,7 +14,7 @@
 
     <div class="p-4">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ $restaurant['name'] }}</h3>
-        
+
         <!-- Iconos de Información -->
         <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5 shrink-0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
@@ -38,6 +38,6 @@
                 @endforeach
              </div>
         </div>
-        
+
     </div>
 </div>

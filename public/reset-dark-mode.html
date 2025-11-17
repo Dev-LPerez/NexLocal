@@ -1,0 +1,139 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Restablecer Modo Oscuro - NexLocal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4F46E5;
+            margin-top: 0;
+        }
+        button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #4338CA;
+        }
+        .info {
+            background: #EEF2FF;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #4F46E5;
+        }
+        .success {
+            background: #DCFCE7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #16A34A;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌓 Restablecer Modo Oscuro</h1>
+
+        <div class="info">
+            <strong>Información:</strong><br>
+            Esta herramienta te permite cambiar manualmente entre modo claro y oscuro, o restablecer completamente la configuración si estás atrapado en un modo.
+        </div>
+
+        <h3>Estado Actual:</h3>
+        <p id="current-status">Detectando...</p>
+
+        <h3>Acciones:</h3>
+        <button onclick="setLightMode()">☀️ Activar Modo Claro</button>
+        <button onclick="setDarkMode()">🌙 Activar Modo Oscuro</button>
+        <button onclick="resetMode()">🔄 Restablecer (Modo Claro)</button>
+
+        <div id="success-message" class="success">
+            ✅ ¡Cambio aplicado! Ahora puedes volver a la aplicación.
+        </div>
+
+        <h3>Instrucciones:</h3>
+        <ol>
+            <li>Haz clic en el botón según el modo que quieras activar</li>
+            <li>Cierra esta pestaña</li>
+            <li>Recarga la página principal de NexLocal (F5)</li>
+            <li>El nuevo modo debería estar activo</li>
+        </ol>
+
+        <div class="info">
+            <strong>Nota:</strong> Si el problema persiste, asegúrate de que JavaScript esté habilitado en tu navegador y que no tengas extensiones bloqueando localStorage.
+        </div>
+    </div>
+
+    <script>
+        // Detectar estado actual
+        function checkCurrentMode() {
+            const darkMode = localStorage.getItem('darkMode');
+            const statusEl = document.getElementById('current-status');
+
+            if (darkMode === 'true') {
+                statusEl.innerHTML = '🌙 <strong>Modo Oscuro</strong> está activo';
+                statusEl.style.color = '#6366F1';
+            } else if (darkMode === 'false') {
+                statusEl.innerHTML = '☀️ <strong>Modo Claro</strong> está activo';
+                statusEl.style.color = '#EAB308';
+            } else {
+                statusEl.innerHTML = '❓ <strong>Sin configuración</strong> (predeterminado: claro)';
+                statusEl.style.color = '#6B7280';
+            }
+        }
+
+        function showSuccess() {
+            document.getElementById('success-message').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('success-message').style.display = 'none';
+            }, 5000);
+        }
+
+        function setLightMode() {
+            localStorage.setItem('darkMode', 'false');
+            document.documentElement.classList.remove('dark');
+            checkCurrentMode();
+            showSuccess();
+        }
+
+        function setDarkMode() {
+            localStorage.setItem('darkMode', 'true');
+            document.documentElement.classList.add('dark');
+            checkCurrentMode();
+            showSuccess();
+        }
+
+        function resetMode() {
+            localStorage.removeItem('darkMode');
+            localStorage.setItem('darkMode', 'false');
+            document.documentElement.classList.remove('dark');
+            checkCurrentMode();
+            showSuccess();
+        }
+
+        // Ejecutar al cargar
+        checkCurrentMode();
+    </script>
+</body>
+</html>
+

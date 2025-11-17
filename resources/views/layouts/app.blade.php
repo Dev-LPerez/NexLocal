@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-{{-- Configuración inicial para dark mode con AlpineJS --}}
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }"
-      x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
+      x-init="darkMode && document.documentElement.classList.add('dark')"
       :class="{ 'dark': darkMode }">
     <head>
         <meta charset="utf-8"> {{-- Asegurado UTF-8 --}}

@@ -1,24 +1,23 @@
-@props(['as' => 'button', 'href' => '#'])
+@props(['as' => 'button', 'href' => '#', 'loading' => false])
 
 @php
     $commonClasses = 'inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:from-indigo-700 hover:to-purple-700 focus:from-indigo-700 focus:to-purple-700 active:from-indigo-900 active:to-purple-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed';
 @endphp
 
-{{-- Renderiza como enlace si 'as' es 'a' --}}
 @if ($as === 'a')
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $commonClasses]) }}>
         {{ $slot }}
     </a>
-{{-- Por defecto, renderiza como botón --}}
 @else
     <button
         {{ $attributes->merge(['type' => 'submit', 'class' => $commonClasses]) }}
         x-data="{ loading: false }"
-        @if(!$attributes->has('onclick') && !$attributes->has('@click'))
-            @submit.window="if($el.closest('form')?.contains($event.target)) { loading = true }"
+        @if(!$attributes->has('onclick'))
+            @click="loading = true; $el.closest('form')?.requestSubmit()"
         @endif
+        :disabled="loading"
     >
-        <span x-show="!loading" class="inline-flex items-center">
+        <span x-show="!loading">
             {{ $slot }}
         </span>
         <span x-show="loading" class="inline-flex items-center" style="display: none;">

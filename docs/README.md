@@ -6,7 +6,103 @@ Bienvenido a la documentación del sistema de gestión de reservas de NexLocal.
 
 ## 📚 Documentos Disponibles
 
-### 1. [Manual de Usuario Completo](./MANUAL_USUARIO_COMPLETO.md) ⭐ **NUEVO - CON CAPTURAS**
+### 🆕 NUEVO: Sistema de Pagos Simulados
+
+#### 1. [Pasarela de Pagos Simulada - Completo](./PASARELA_PAGOS_SIMULADA.md) ⭐ **IMPLEMENTACIÓN NUEVA**
+**Audiencia:** Desarrolladores, Product Managers, Evaluadores Académicos  
+**Contenido:**
+- Explicación completa del sistema de pagos simulados
+- Arquitectura y flujo de datos
+- Componentes implementados (Controller, Views, Routes)
+- Características visuales y UX/UI
+- Validaciones implementadas
+- Comparación con sistemas reales (Stripe)
+- Guía de migración a producción
+- Mejoras futuras sugeridas
+
+**Cuándo usarlo:**
+- ✅ Necesitas entender cómo funciona la pasarela simulada
+- ✅ Vas a presentar el proyecto académico
+- ✅ Quieres migrar a Stripe/PayPal real
+- ✅ Necesitas documentación técnica completa
+
+---
+
+#### 2. [Quick Start - Pagos](./QUICK_START_PAGOS.md) 🚀 **INICIO RÁPIDO**
+**Audiencia:** Cualquiera que quiera probar rápidamente  
+**Contenido:**
+- Guía de 5 minutos para probar el sistema
+- Datos de tarjeta para testing
+- Checklist de funcionalidad
+- Solución rápida de problemas
+- Comandos útiles
+- Script de demo para presentación
+
+**Cuándo usarlo:**
+- ✅ Primera vez usando el sistema de pagos
+- ✅ Quieres hacer una demo rápida
+- ✅ Necesitas probar que todo funciona
+- ✅ Tienes poco tiempo
+
+---
+
+#### 3. [Tarjetas de Prueba](./TARJETAS_PRUEBA.md) 💳
+**Audiencia:** Testers, Usuarios de Demo  
+**Contenido:**
+- Tarjetas válidas para testing
+- Casos de prueba completos
+- Validaciones del sistema
+- Auto-formateo explicado
+- Comparación con Stripe real
+- Script de presentación
+
+**Cuándo usarlo:**
+- ✅ Necesitas tarjetas para probar
+- ✅ Quieres entender qué se valida
+- ✅ Vas a hacer testing exhaustivo
+- ✅ Necesitas ejemplos de datos
+
+---
+
+#### 4. [Guía Visual - Pagos](./GUIA_VISUAL_PAGOS.md) 🎨
+**Audiencia:** Diseñadores, Evaluadores, Presentadores  
+**Contenido:**
+- Mockups ASCII de cada pantalla
+- Flujo visual completo
+- Colores e iconos utilizados
+- Animaciones implementadas
+- Vista responsive
+- Estados del formulario
+
+**Cuándo usarlo:**
+- ✅ Necesitas ver cómo se ve sin ejecutar
+- ✅ Quieres preparar una presentación
+- ✅ Necesitas documentar la interfaz
+- ✅ Diseño visual de referencia
+
+---
+
+#### 5. [Resumen de Implementación - Pagos](./RESUMEN_IMPLEMENTACION_PAGOS.md) ✅
+**Audiencia:** Supervisores, Evaluadores, Stakeholders  
+**Contenido:**
+- Resumen ejecutivo de la implementación
+- Archivos modificados/creados
+- Checklist completo
+- Estado del proyecto
+- Puntos clave para presentación
+- Comparación con Stripe
+
+**Cuándo usarlo:**
+- ✅ Necesitas un overview rápido
+- ✅ Quieres ver qué se implementó
+- ✅ Evaluación del proyecto
+- ✅ Presentación ejecutiva
+
+---
+
+### 📖 Manuales de Usuario
+
+#### 1. [Manual de Usuario Completo](./MANUAL_USUARIO_COMPLETO.md) ⭐ **CON CAPTURAS**
 **Audiencia:** Turistas y Guías (usuarios finales)  
 **Contenido:**
 - **64 indicaciones de capturas de pantalla** (qué tomar y qué señalar)
@@ -27,7 +123,7 @@ Bienvenido a la documentación del sistema de gestión de reservas de NexLocal.
 
 ---
 
-### 2. [Manual de Usuario](./MANUAL_USUARIO.md)
+#### 2. [Manual de Usuario](./MANUAL_USUARIO.md)
 **Audiencia:** Turistas y Guías (usuarios finales)  
 **Contenido:**
 - Lenguaje simple y no técnico

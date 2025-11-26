@@ -25,8 +25,10 @@ class Booking extends Model
         'availability_slot_id',
         'payment_status',
         'payment_method',
+        'payment_intent_id',
+        'paid_at',
         'total_amount',
-        'num_travelers', // Asegura que este campo sea asignable
+        'num_travelers',
     ];
 
     /**
@@ -38,6 +40,7 @@ class Booking extends Model
     {
         return [
             'booking_date' => 'datetime',
+            'paid_at' => 'datetime',
             'total_amount' => 'decimal:2',
             'tourist_confirmed_completed' => 'boolean',
             'guide_confirmed_completed' => 'boolean',

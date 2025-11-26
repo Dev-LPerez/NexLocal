@@ -51,6 +51,11 @@ Route::middleware('auth')->group(function () {
     // Marca una reserva como completada (sistema de dos pasos)
     Route::patch('/bookings/{booking}/mark-completed', [BookingController::class, 'markAsCompleted'])->name('bookings.markAsCompleted');
 
+    // --- RUTAS PARA CHECKOUT DE PAGO SIMULADO ---
+    Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout.show');
+    Route::post('/checkout/process', [BookingController::class, 'processPayment'])->name('checkout.process');
+    Route::get('/checkout/success/{booking}', [BookingController::class, 'checkoutSuccess'])->name('checkout.success');
+
     // --- NUEVAS RUTAS PARA RESEÑAS ---
     Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');

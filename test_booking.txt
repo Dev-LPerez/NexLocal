@@ -1,0 +1,2 @@
+Test de creación de booking con payment_intent_id y paid_at
+

@@ -26,14 +26,13 @@ class BookingController extends Controller
     }
 
     /**
-     * Store a newly created booking in storage.
+     * Prepara los datos de reserva y redirige al checkout.
      */
     public function store(Request $request)
     {
         $request->validate([
             'availability_slot_id' => 'required|exists:availability_slots,id',
             'num_travelers' => 'required|integer|min:1',
-            // Omitir validación de 'payment_method_id' por ahora
         ]);
 
         // Prevenir que un guía solicite una reserva
@@ -54,37 +53,125 @@ class BookingController extends Controller
         // Calcular el monto total
         $totalAmount = $slot->experience->price * $request->num_travelers;
 
-        // Lógica de pago (simulada por ahora)
-        // En un caso real, aquí se procesaría el pago con Stripe/PayPal
-        // y se obtendría un 'payment_intent_id'
-        $paymentIntentId = 'pi_' . uniqid(); // ID de pago simulado
-        $paymentStatus = 'succeeded'; // Estado de pago simulado
-
-        // Si el pago es exitoso, crear la reserva
-        if ($paymentStatus == 'succeeded') {
-            // Actualizar los cupos disponibles
-            // Se usa DB::transaction en un escenario real para atomicidad
-            $slot->decrement('available_spots', $request->num_travelers);
-
-            $booking = Booking::create([
-                'user_id' => Auth::id(),
-                'experience_id' => $slot->experience_id,
+        // Guardar datos en sesión para el checkout
+        session([
+            'booking_checkout' => [
                 'availability_slot_id' => $slot->id,
+                'experience_id' => $slot->experience_id,
+                'experience_title' => $slot->experience->title,
+                'experience_price' => $slot->experience->price,
+                'booking_date' => $slot->start_time->format('d/m/Y H:i'),
                 'num_travelers' => $request->num_travelers,
                 'total_amount' => $totalAmount,
-                'status' => 'pending', // Inicia como 'pending' según el nuevo flujo
-                'payment_intent_id' => $paymentIntentId,
-                'payment_status' => $paymentStatus,
-                'paid_at' => now(),
-            ]);
+            ]
+        ]);
 
-            // Notificar al guía sobre la nueva reserva
-            NotificationHelper::newBookingForGuide($slot->experience->user, $booking);
+        return redirect()->route('checkout.show');
+    }
 
-            return redirect()->route('bookings.index')->with('success', '¡Reserva realizada con éxito! Esperando confirmación del guía.');
+    /**
+     * Muestra la página de checkout con el formulario de pago simulado.
+     */
+    public function showCheckout()
+    {
+        $bookingData = session('booking_checkout');
+
+        if (!$bookingData) {
+            return redirect()->route('home')->with('error', 'No hay datos de reserva.');
         }
 
-        return back()->with('error', 'Hubo un problema al procesar tu pago. Por favor, intenta de nuevo.');
+        return view('bookings.checkout', compact('bookingData'));
+    }
+
+    /**
+     * Procesa el pago simulado y crea la reserva.
+     */
+    public function processPayment(Request $request)
+    {
+        $request->validate([
+            'card_number' => 'required|string|min:15|max:19',
+            'card_holder' => 'required|string|max:255',
+            'expiry_date' => 'required|string|regex:/^\d{2}\/\d{2}$/',
+            'cvv' => 'required|string|min:3|max:4',
+        ]);
+
+        $bookingData = session('booking_checkout');
+
+        if (!$bookingData) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesión expirada. Por favor, intenta de nuevo.'
+            ], 400);
+        }
+
+        // 🎭 SIMULACIÓN: Espera artificial para dar realismo
+        sleep(2);
+
+        // Obtener el slot nuevamente para verificar disponibilidad
+        $slot = AvailabilitySlot::with('experience')->findOrFail($bookingData['availability_slot_id']);
+
+        // Verificar nuevamente los cupos disponibles
+        if ($bookingData['num_travelers'] > $slot->available_spots) {
+            session()->forget('booking_checkout');
+            return response()->json([
+                'success' => false,
+                'message' => 'Lo sentimos, los cupos ya no están disponibles.'
+            ], 400);
+        }
+
+        // 🎭 SIMULACIÓN: Generar ID de pago falso
+        $paymentIntentId = 'pi_mock_' . uniqid();
+        $paidAt = \Carbon\Carbon::now();
+
+        // Crear la reserva
+        $slot->decrement('available_spots', $bookingData['num_travelers']);
+
+        $booking = Booking::create([
+            'user_id' => Auth::id(),
+            'experience_id' => $bookingData['experience_id'],
+            'availability_slot_id' => $slot->id,
+            'num_travelers' => $bookingData['num_travelers'],
+            'total_amount' => $bookingData['total_amount'],
+            'status' => 'pending',
+            'payment_intent_id' => $paymentIntentId,
+            'payment_status' => 'succeeded',
+            'payment_method' => 'tarjeta_simulada',
+            'paid_at' => $paidAt,
+        ]);
+
+        // Verificar y asegurar que se guardaron los datos de pago
+        if (!$booking->payment_intent_id || !$booking->paid_at) {
+            $booking->payment_intent_id = $paymentIntentId;
+            $booking->paid_at = $paidAt;
+            $booking->save();
+        }
+
+        // Notificar al guía
+        NotificationHelper::newBookingForGuide($slot->experience->user, $booking);
+
+        // Limpiar sesión
+        session()->forget('booking_checkout');
+
+        return response()->json([
+            'success' => true,
+            'message' => '¡Pago procesado con éxito!',
+            'redirect_url' => route('checkout.success', ['booking' => $booking->id])
+        ]);
+    }
+
+    /**
+     * Muestra la página de confirmación después del pago exitoso.
+     */
+    public function checkoutSuccess(Booking $booking)
+    {
+        // Verificar que la reserva pertenece al usuario actual
+        if ($booking->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $booking->load(['experience', 'availabilitySlot']);
+
+        return view('bookings.success', compact('booking'));
     }
 
     /**

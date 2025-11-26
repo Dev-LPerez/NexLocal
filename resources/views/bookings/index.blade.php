@@ -71,28 +71,30 @@
                             </div>
 
                             <!-- Estado y Acciones -->
-                            <div class="flex-shrink-0 text-right space-y-2 w-full sm:w-auto">
-                                <div>
-                                    @php
-                                        $statusClasses = [
-                                            'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-                                            'confirmed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-                                            'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-                                            'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-                                            'in_progress' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-                                        ];
-                                        $statusText = [
-                                            'pending' => 'Pendiente',
-                                            'confirmed' => 'Confirmada',
-                                            'cancelled' => 'Cancelada',
-                                            'completed' => 'Completada',
-                                            'in_progress' => 'En Progreso',
-                                        ];
-                                    @endphp
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClasses[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                        {{ $statusText[$booking->status] ?? ucfirst($booking->status) }}
-                                    </span>
-                                </div>
+                            <div class="flex-shrink-0 w-full sm:w-auto">
+                                <div class="flex flex-col items-end space-y-2">
+                                    <!-- Badge de Estado -->
+                                    <div>
+                                        @php
+                                            $statusClasses = [
+                                                'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+                                                'confirmed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+                                                'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+                                                'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+                                                'in_progress' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+                                            ];
+                                            $statusText = [
+                                                'pending' => 'Pendiente',
+                                                'confirmed' => 'Confirmada',
+                                                'cancelled' => 'Cancelada',
+                                                'completed' => 'Completada',
+                                                'in_progress' => 'En Progreso',
+                                            ];
+                                        @endphp
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClasses[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                            {{ $statusText[$booking->status] ?? ucfirst($booking->status) }}
+                                        </span>
+                                    </div>
 
                                 {{-- Botón para abrir chat --}}
                                 @if(in_array($booking->status, ['pending', 'confirmed', 'in_progress', 'completed']))
@@ -141,7 +143,8 @@
                                             Marcar como Completada
                                         </button>
                                     </form>
-                                @endif
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     @empty

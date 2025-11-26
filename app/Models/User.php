@@ -22,10 +22,16 @@ class User extends Authenticatable {
         'name',
         'email',
         'password',
-        'role', // Asegúrate de que 'role' esté aquí
+        'role',
         'identity_document_path',
+        'identity_document_back_path',
         'identity_verified_at',
-        'bio', // corregido a 'bio' para coincidir con la base de datos
+        'verification_status',
+        'rejection_reason',
+        'is_suspended',
+        'suspension_reason',
+        'suspended_at',
+        'bio',
         'profile_photo_path',
         'age',
         'hobbies',
@@ -103,5 +109,63 @@ class User extends Authenticatable {
     public function unreadNotificationsCount(): int
     {
         return $this->notifications()->where('is_read', false)->count();
+    }
+
+    /**
+     * Check if the guide is verified and can create experiences.
+     */
+    public function isVerifiedGuide(): bool
+    {
+        return $this->role === 'guide' &&
+               $this->verification_status === 'approved' &&
+               $this->identity_verified_at !== null;
+    }
+
+    /**
+     * Check if the guide has pending verification.
+     */
+    public function hasPendingVerification(): bool
+    {
+        return $this->role === 'guide' &&
+               $this->verification_status === 'pending';
+    }
+
+    /**
+     * Check if the guide verification was rejected.
+     */
+    public function isVerificationRejected(): bool
+    {
+        return $this->role === 'guide' &&
+               $this->verification_status === 'rejected';
+    }
+
+    /**
+     * Check if the user is suspended.
+     */
+    public function isSuspended(): bool
+    {
+        return $this->is_suspended === true;
+    }
+
+    /**
+     * Suspend the user account.
+     */
+    public function suspend(string $reason): void
+    {
+        $this->is_suspended = true;
+        $this->suspension_reason = $reason;
+        $this->suspended_at = now();
+        $this->save();
+    }
+
+    /**
+     * Restore the user account.
+     */
+    public function restore(): void
+    {
+        $this->is_suspended = false;
+        $this->suspension_reason = null;
+        $this->suspended_at = null;
+        $this->save();
     }
 }

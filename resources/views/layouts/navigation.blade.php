@@ -13,40 +13,30 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    {{-- Enlace principal (Home o Dashboard según autenticación) --}}
-                    @guest
-                        <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                            Inicio
-                        </x-nav-link>
-                    @endguest
-                    @auth
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{-- El texto cambia según el rol --}}
-                            @if(Auth::user()->role === 'guide')
-                                Panel de Guía
-                            @elseif(Auth::user()->role === 'tourist')
-                                Dashboard {{-- El controlador redirigirá a "Mis Reservas" --}}
-                            @else
-                                Dashboard
-                            @endif
-                        </x-nav-link>
-                    @endauth
-
-                    {{-- Enlace para "Descubrir Experiencias" (siempre visible, enlace a Home) --}}
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home') && Auth::check()">
-                        Experiencias
+                    {{-- Enlace a Inicio (siempre visible) --}}
+                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                        Inicio
                     </x-nav-link>
 
-                    {{-- --- Enlaces Condicionales por Rol --- --}}
+                    {{-- --- Enlaces Específicos por Rol --- --}}
                     @auth
-                        @if(Auth::user()->role === 'guide')
+                        @if(Auth::user()->role === 'admin')
+                            {{-- Admin solo ve Panel Admin con estadísticas --}}
+                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                                Panel Admin
+                            </x-nav-link>
+
+                        @elseif(Auth::user()->role === 'guide')
+                            {{-- Guía ve: Panel de Guía y Crear Experiencia --}}
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                                Panel de Guía
+                            </x-nav-link>
                             <x-nav-link :href="route('experiences.create')" :active="request()->routeIs('experiences.create')">
                                 Crear Experiencia
                             </x-nav-link>
-                            {{-- El enlace a "Panel de Guía" ya está cubierto por 'dashboard' --}}
-                        @endif
 
-                        @if(Auth::user()->role === 'tourist')
+                        @elseif(Auth::user()->role === 'tourist')
+                            {{-- Turista solo ve Mis Reservas (Inicio ya está arriba) --}}
                             <x-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.index')">
                                 Mis Reservas
                             </x-nav-link>
@@ -309,39 +299,37 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            @guest
-                <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                    Inicio
-                </x-responsive-nav-link>
-            @endguest
-            @auth
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    @if(Auth::user()->role === 'guide')
-                        Panel de Guía
-                    @else
-                        Dashboard
-                    @endif
-                </x-responsive-nav-link>
-            @endauth
-
-            <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home') && Auth::check()">
-                Experiencias
+            {{-- Enlace a Inicio (siempre visible) --}}
+            <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                Inicio
             </x-responsive-nav-link>
 
+            {{-- --- Enlaces Específicos por Rol --- --}}
             @auth
-                @if(Auth::user()->role === 'guide')
+                @if(Auth::user()->role === 'admin')
+                    {{-- Admin solo ve Panel Admin --}}
+                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')" class="text-red-600 dark:text-red-400 font-bold">
+                        Panel Admin
+                    </x-responsive-nav-link>
+
+                @elseif(Auth::user()->role === 'guide')
+                    {{-- Guía ve: Panel de Guía y Crear Experiencia --}}
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        Panel de Guía
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('experiences.create')" :active="request()->routeIs('experiences.create')">
                         Crear Experiencia
                     </x-responsive-nav-link>
-                @endif
 
-                @if(Auth::user()->role === 'tourist')
+                @elseif(Auth::user()->role === 'tourist')
+                    {{-- Turista solo ve Mis Reservas --}}
                     <x-responsive-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.index')">
                         Mis Reservas
                     </x-responsive-nav-link>
                 @endif
             @endauth
 
+            {{-- Enlaces de autenticación (solo para no autenticados) --}}
             @guest
                 <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">
                     Iniciar Sesión

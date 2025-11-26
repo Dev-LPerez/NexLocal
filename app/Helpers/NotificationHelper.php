@@ -132,5 +132,28 @@ class NotificationHelper
             'link' => $link,
         ]);
     }
+
+    /**
+     * Crear una notificación genérica (método alternativo más simple)
+     *
+     * @param int $userId ID del usuario que recibirá la notificación
+     * @param string $title Título de la notificación
+     * @param string $message Mensaje de la notificación
+     * @param string $type Tipo de notificación
+     * @param string|null $link URL de destino (opcional)
+     * @param string|null $icon Icono/emoji (opcional)
+     * @return \App\Models\Notification
+     */
+    public static function create(int $userId, string $title, string $message, string $type = 'general', ?string $link = null, ?string $icon = null)
+    {
+        return Notification::create([
+            'user_id' => $userId,
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'icon' => $icon ?? '📢',
+            'link' => $link,
+        ]);
+    }
 }
 

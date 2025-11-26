@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'verified.guide' => \App\Http\Middleware\EnsureGuideIsVerified::class,
+            'check.suspended' => \App\Http\Middleware\CheckIfSuspended::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

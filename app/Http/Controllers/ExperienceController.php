@@ -21,16 +21,11 @@ class ExperienceController extends Controller
     {
         $searchTerm = $request->input('search');
 
-        // --- MODIFICACIÓN AQUÍ ---
-        // Cargamos la relación 'user' y también el conteo de reseñas y el promedio de calificación.
-        // Esto nos dará acceso a:
-        // $experience->reviews_count
-        // $experience->reviews_avg_rating
+        // Solo mostrar experiencias publicadas, destacadas primero
         $query = Experience::with('user')
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
-            ->latest();
-        // --- FIN DE LA MODIFICACIÓN ---
+            ->publiclyVisible(); // Usa el scope que incluye filtro y ordenamiento
 
         if ($searchTerm) {
             $query->where(function ($q) use ($searchTerm) {
@@ -137,6 +132,14 @@ class ExperienceController extends Controller
      */
     public function show(Experience $experience)
     {
+        // Verificar que la experiencia esté publicada, excepto para el propietario y admins
+        if ($experience->status !== 'published') {
+            // Si no es el dueño ni admin, denegar acceso
+            if (!Auth::check() || (Auth::id() !== $experience->user_id && Auth::user()->role !== 'admin')) {
+                abort(404, 'Esta experiencia no está disponible.');
+            }
+        }
+
         $experience->load([
             'user',
             'availabilitySlots' => function ($query) {

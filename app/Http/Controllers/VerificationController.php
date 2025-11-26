@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Helpers\NotificationHelper;
 
 class VerificationController extends Controller
 {
@@ -12,6 +14,13 @@ class VerificationController extends Controller
      */
     public function create()
     {
+        $user = Auth::user();
+
+        // Redirigir si no es guía
+        if ($user->role !== 'guide') {
+            return redirect()->route('home')->with('error', 'Solo los guías necesitan verificar su identidad.');
+        }
+
         return view('auth.verify-identity');
     }
 
@@ -22,25 +31,55 @@ class VerificationController extends Controller
     {
         // 1. Validar la petición
         $request->validate([
-            'identity_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'identity_document_front' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'], // 5MB
+            'identity_document_back' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'], // 5MB
+        ], [
+            'identity_document_front.required' => 'El documento frontal es obligatorio.',
+            'identity_document_front.mimes' => 'El documento frontal debe ser un archivo PDF, JPG, JPEG o PNG.',
+            'identity_document_front.max' => 'El documento frontal no debe pesar más de 5MB.',
+            'identity_document_back.required' => 'El documento trasero es obligatorio.',
+            'identity_document_back.mimes' => 'El documento trasero debe ser un archivo PDF, JPG, JPEG o PNG.',
+            'identity_document_back.max' => 'El documento trasero no debe pesar más de 5MB.',
         ]);
 
         // 2. Obtener el usuario autenticado
         $user = Auth::user();
 
-        // 3. Guardar el archivo en una carpeta privada
-        // El nombre del archivo será el ID del usuario para evitar colisiones
-        $path = $request->file('identity_document')->storeAs(
-            'identity-documents', // Carpeta
-            $user->id . '.' . $request->file('identity_document')->extension(), // Nombre del archivo
-            'private' // Disco de almacenamiento (configurado en filesystems.php)
+        // 3. Guardar el archivo frontal
+        $frontPath = $request->file('identity_document_front')->storeAs(
+            'identity-documents',
+            $user->id . '_front.' . $request->file('identity_document_front')->extension(),
+            'private'
         );
 
-        // 4. Actualizar al usuario con la ruta del archivo
-        $user->identity_document_path = $path;
+        // 4. Guardar el archivo trasero
+        $backPath = $request->file('identity_document_back')->storeAs(
+            'identity-documents',
+            $user->id . '_back.' . $request->file('identity_document_back')->extension(),
+            'private'
+        );
+
+        // 5. Actualizar al usuario con las rutas y estado
+        $user->identity_document_path = $frontPath;
+        $user->identity_document_back_path = $backPath;
+        $user->verification_status = 'pending';
+        $user->rejection_reason = null; // Limpiar razón de rechazo si existía
         $user->save();
 
-        // 5. Redirigir de vuelta con un mensaje de éxito
-        return back()->with('status', '¡Documento subido con éxito! Lo revisaremos pronto.');
+        // 6. Notificar a todos los administradores
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            NotificationHelper::create(
+                $admin->id,
+                '📋 Nueva Solicitud de Verificación',
+                "El guía {$user->name} ha enviado sus documentos de identidad para verificación.",
+                'admin_verification',
+                route('admin.verification')
+            );
+        }
+
+        // 7. Redirigir con mensaje de éxito
+        return redirect()->route('verification.create')->with('status', '¡Documentos enviados con éxito! Un administrador revisará tu solicitud pronto.');
     }
 }
+

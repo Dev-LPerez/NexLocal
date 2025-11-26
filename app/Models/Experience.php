@@ -23,16 +23,16 @@ class Experience extends Model
         'location',
         'duration',
         'price',
-        'image_path', // Si tienes imagen
+        'image_path',
         'category',
         'includes',
         'not_includes',
-
-        // --- CAMPOS AÑADIDOS ---
         'meeting_point_name',
         'meeting_point_lat',
         'meeting_point_lng',
-        // --- FIN DE CAMPOS AÑADIDOS ---
+        'status',
+        'is_featured',
+        'moderation_note',
     ];
 
     /**
@@ -60,6 +60,32 @@ class Experience extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Scope para obtener solo experiencias publicadas.
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
+    }
+
+    /**
+     * Scope para obtener solo experiencias destacadas.
+     */
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
+
+    /**
+     * Scope para obtener experiencias visibles públicamente (publicadas y destacadas primero).
+     */
+    public function scopePubliclyVisible($query)
+    {
+        return $query->where('status', 'published')
+                     ->orderByDesc('is_featured')
+                     ->latest();
     }
 
     /**

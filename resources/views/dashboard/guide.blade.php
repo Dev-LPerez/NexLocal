@@ -9,6 +9,62 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="space-y-8">
 
+                {{-- Alerta de Verificación --}}
+                @if(!Auth::user()->isVerifiedGuide())
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-l-4 border-yellow-500 p-6 rounded-lg shadow-lg">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-8 w-8 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4 flex-1">
+                                @if(Auth::user()->verification_status === 'pending')
+                                    <h3 class="text-lg font-bold text-yellow-800 dark:text-yellow-300 mb-2">
+                                        ⏳ Verificación en Proceso
+                                    </h3>
+                                    <p class="text-sm text-yellow-700 dark:text-yellow-400 mb-3">
+                                        Hemos recibido tus documentos de identidad y están siendo revisados por nuestro equipo.
+                                        Te notificaremos cuando tu cuenta sea verificada (generalmente en 24-48 horas).
+                                    </p>
+                                    <p class="text-xs text-yellow-600 dark:text-yellow-500">
+                                        Mientras tanto, puedes explorar la plataforma pero no podrás crear experiencias hasta completar la verificación.
+                                    </p>
+                                @elseif(Auth::user()->verification_status === 'rejected')
+                                    <h3 class="text-lg font-bold text-red-800 dark:text-red-300 mb-2">
+                                        ❌ Verificación Rechazada
+                                    </h3>
+                                    <p class="text-sm text-red-700 dark:text-red-400 mb-2">
+                                        <strong>Razón:</strong> {{ Auth::user()->rejection_reason ?? 'No se proporcionó una razón específica.' }}
+                                    </p>
+                                    <p class="text-sm text-red-700 dark:text-red-400 mb-3">
+                                        Por favor, revisa los documentos y envíalos nuevamente asegurándote de que sean claros y legibles.
+                                    </p>
+                                    <a href="{{ route('verification.create') }}"
+                                       class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition">
+                                        📤 Enviar Nuevos Documentos
+                                    </a>
+                                @else
+                                    <h3 class="text-lg font-bold text-yellow-800 dark:text-yellow-300 mb-2">
+                                        📋 Verificación de Identidad Requerida
+                                    </h3>
+                                    <p class="text-sm text-yellow-700 dark:text-yellow-400 mb-3">
+                                        Para crear experiencias turísticas, primero debes verificar tu identidad.
+                                        Este proceso es rápido y garantiza la seguridad de todos nuestros usuarios.
+                                    </p>
+                                    <a href="{{ route('verification.create') }}"
+                                       class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Verificar Mi Identidad Ahora
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 {{-- 1. Resumen y Acción Rápida --}}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="p-6 bg-white dark:bg-gray-800 shadow-lg rounded-2xl border dark:border-gray-700">
@@ -38,14 +94,26 @@
                         </div>
                     </div>
                     <div class="p-6 bg-white dark:bg-gray-800 shadow-lg rounded-2xl border dark:border-gray-700 flex flex-col justify-center">
-                        <a href="{{ route('experiences.create') }}" class="w-full">
-                            <x-primary-button class="w-full text-center justify-center !py-3">
-                                <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                        @if(Auth::user()->isVerifiedGuide())
+                            <a href="{{ route('experiences.create') }}" class="w-full">
+                                <x-primary-button class="w-full text-center justify-center !py-3">
+                                    <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                                    </svg>
+                                    Crear Nueva Experiencia
+                                </x-primary-button>
+                            </a>
+                        @else
+                            <button disabled class="w-full text-center justify-center !py-3 px-4 bg-gray-400 dark:bg-gray-600 text-white font-semibold rounded-md cursor-not-allowed opacity-60">
+                                <svg class="h-5 w-5 mr-2 inline-block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                 </svg>
-                                Crear Nueva Experiencia
-                            </x-primary-button>
-                        </a>
+                                Verificación Requerida
+                            </button>
+                            <p class="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+                                Completa la verificación para crear experiencias
+                            </p>
+                        @endif
                     </div>
                 </div>
 
@@ -55,12 +123,43 @@
                     <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border dark:border-gray-700">
                         <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse ($experiences as $experience)
-                                <li class="p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                                <li class="p-4 flex flex-col md:flex-row md:items-center md:justify-between {{ $experience->status !== 'published' ? 'bg-yellow-50 dark:bg-yellow-900/10' : '' }}">
                                     <div class="flex-1 min-w-0">
-                                        <a href="{{ route('experiences.show', $experience) }}" class="text-lg font-semibold text-indigo-600 dark:text-indigo-400 hover:underline truncate">{{ $experience->title }}</a>
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <a href="{{ route('experiences.show', $experience) }}" class="text-lg font-semibold text-indigo-600 dark:text-indigo-400 hover:underline truncate">{{ $experience->title }}</a>
+
+                                            {{-- Badges de estado --}}
+                                            @if($experience->is_featured)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                                    ⭐ Destacada
+                                                </span>
+                                            @endif
+
+                                            @if($experience->status === 'hidden')
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                                                    🔒 Oculta por Admin
+                                                </span>
+                                            @elseif($experience->status === 'rejected')
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                                    ❌ Rechazada
+                                                </span>
+                                            @elseif($experience->status === 'draft')
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400">
+                                                    📝 Borrador
+                                                </span>
+                                            @endif
+                                        </div>
+
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
                                             {{ $experience->location }} - ${{ number_format($experience->price, 0, ',', '.') }}
                                         </p>
+
+                                        {{-- Mostrar nota de moderación si existe --}}
+                                        @if($experience->moderation_note && $experience->status !== 'published')
+                                            <p class="text-xs text-orange-600 dark:text-orange-400 mt-1 italic">
+                                                📋 Nota del Admin: {{ $experience->moderation_note }}
+                                            </p>
+                                        @endif
                                     </div>
                                     <div class="flex-shrink-0 mt-4 md:mt-0 md:ml-4 flex space-x-3">
                                         <a href="{{ route('experiences.edit', $experience) }}" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">Editar</a>

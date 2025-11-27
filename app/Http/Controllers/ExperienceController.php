@@ -22,10 +22,14 @@ class ExperienceController extends Controller
         $searchTerm = $request->input('search');
 
         // Solo mostrar experiencias publicadas, destacadas primero
+        // Y excluir experiencias de usuarios suspendidos
         $query = Experience::with('user')
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
-            ->publiclyVisible(); // Usa el scope que incluye filtro y ordenamiento
+            ->publiclyVisible() // Usa el scope que incluye filtro y ordenamiento
+            ->whereHas('user', function ($q) {
+                $q->where('is_suspended', false);
+            });
 
         if ($searchTerm) {
             $query->where(function ($q) use ($searchTerm) {

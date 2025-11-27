@@ -12,18 +12,31 @@ class CheckIfSuspended
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * Verifica si el usuario está suspendido y bloquea acciones críticas
+     * permitiéndole ver información pero no realizar acciones.
      */
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check() && Auth::user()->isSuspended()) {
-            $reason = Auth::user()->suspension_reason ?? 'No se proporcionó una razón';
-            Auth::logout();
+            // Rutas permitidas incluso si está suspendido
+            $allowedRoutes = [
+                'account.suspended',
+                'logout',
+                'profile.edit',
+                'profile.show',
+            ];
 
-            return redirect()->route('login')
-                ->withErrors([
-                    'email' => 'Tu cuenta ha sido suspendida. Razón: ' . $reason
-                ]);
+            // Rutas permitidas que empiezan con ciertos prefijos
+            $currentRoute = $request->route()->getName();
+
+            // Si no es una ruta permitida, redirigir a página de suspensión
+            if (!in_array($currentRoute, $allowedRoutes) &&
+                !str_starts_with($currentRoute, 'password.') &&
+                $currentRoute !== null) {
+
+                return redirect()->route('account.suspended')
+                    ->with('warning', 'Tu cuenta está suspendida. Contacta con soporte para más información.');
+            }
         }
 
         return $next($request);

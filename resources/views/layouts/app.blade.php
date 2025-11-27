@@ -35,6 +35,40 @@
                 </header>
             @endisset
 
+            {{-- Banner de Cuenta Suspendida --}}
+            @auth
+                @if(auth()->user()->isSuspended())
+                    <div class="bg-red-600 text-white">
+                        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                            <div class="flex items-center justify-between flex-wrap">
+                                <div class="flex-1 flex items-center">
+                                    <span class="flex p-2 rounded-lg bg-red-800">
+                                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </span>
+                                    <p class="ml-3 font-medium">
+                                        <span class="md:hidden">Tu cuenta está suspendida</span>
+                                        <span class="hidden md:inline">
+                                            ⚠️ Tu cuenta ha sido suspendida. No puedes crear experiencias ni hacer reservas.
+                                            @if(auth()->user()->suspension_reason)
+                                                Razón: {{ Str::limit(auth()->user()->suspension_reason, 50) }}
+                                            @endif
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="mt-2 flex-shrink-0 w-full sm:mt-0 sm:w-auto">
+                                    <a href="{{ route('account.suspended') }}"
+                                       class="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-red-600 bg-white hover:bg-red-50">
+                                        Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endauth
+
             {{-- Contenido Principal --}}
             <main class="flex-grow"> {{-- flex-grow para empujar footer hacia abajo --}}
                 {{-- Sección para mostrar mensajes flash (RF-018 web notification) --}}

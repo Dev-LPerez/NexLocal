@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\AccountSuspendedController;
 
 // --- Ruta Pública Principal ---
 Route::get('/', [ExperienceController::class, 'index'])->name('home');
@@ -25,40 +26,41 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 
 // --- Grupo de Rutas Protegidas por Autenticación ---
+    // Ruta para cuenta suspendida (debe estar antes del middleware check.suspended)
+    Route::get('/account/suspended', [AccountSuspendedController::class, 'index'])->name('account.suspended');
+
 Route::middleware('auth')->group(function () {
     // Rutas para gestión del perfil del usuario (Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Rutas para gestión de experiencias (Guías) - Requiere verificación
+    // Rutas para gestión de experiencias (Guías) - Requiere verificación y cuenta no suspendida
     Route::resource('experiences', ExperienceController::class)
         ->except(['index', 'show'])
-        ->middleware('verified.guide');
+        ->middleware(['verified.guide', 'check.suspended']);
 
     // Rutas para la verificación de identidad del Guía
     Route::get('/verify-identity', [VerificationController::class, 'create'])->name('verification.create');
     Route::post('/verify-identity', [VerificationController::class, 'store'])->name('verification.store');
 
-    // --- RUTAS PARA GESTIÓN DE RESERVAS ---
-    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
-    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-    // Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel'); // Comentada, usamos 'status'
-    // Route::patch('/bookings/{booking}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm'); // Comentada, usamos 'status'
-    Route::patch('/bookings/{booking}/guide-cancel', [BookingController::class, 'guideCancel'])->name('bookings.guideCancel');
-    // Cambia el estado de una reserva (confirmar/cancelar) - para turistas y guías
-    Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
-    // Marca una reserva como completada (sistema de dos pasos)
-    Route::patch('/bookings/{booking}/mark-completed', [BookingController::class, 'markAsCompleted'])->name('bookings.markAsCompleted');
+    // --- RUTAS PARA GESTIÓN DE RESERVAS (protegidas contra usuarios suspendidos) ---
+    Route::middleware('check.suspended')->group(function () {
+        Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+        Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+        Route::patch('/bookings/{booking}/guide-cancel', [BookingController::class, 'guideCancel'])->name('bookings.guideCancel');
+        Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
+        Route::patch('/bookings/{booking}/mark-completed', [BookingController::class, 'markAsCompleted'])->name('bookings.markAsCompleted');
 
-    // --- RUTAS PARA CHECKOUT DE PAGO SIMULADO ---
-    Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout.show');
-    Route::post('/checkout/process', [BookingController::class, 'processPayment'])->name('checkout.process');
-    Route::get('/checkout/success/{booking}', [BookingController::class, 'checkoutSuccess'])->name('checkout.success');
+        // Rutas de checkout
+        Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout.show');
+        Route::post('/checkout/process', [BookingController::class, 'processPayment'])->name('checkout.process');
+        Route::get('/checkout/success/{booking}', [BookingController::class, 'checkoutSuccess'])->name('checkout.success');
 
-    // --- NUEVAS RUTAS PARA RESEÑAS ---
-    Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
-    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+        // Rutas de reseñas
+        Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
+        Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    });
 
     // --- RUTAS PARA NOTIFICACIONES ---
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

@@ -46,11 +46,9 @@ class Experience extends Model
             'includes' => 'array',
             'not_includes' => 'array',
             'price' => 'decimal:2',
-
-            // --- CASTS AÑADIDOS ---
             'meeting_point_lat' => 'decimal:7',
             'meeting_point_lng' => 'decimal:7',
-            // --- FIN DE CASTS AÑADIDOS ---
+            'is_featured' => 'boolean',
         ];
     }
 

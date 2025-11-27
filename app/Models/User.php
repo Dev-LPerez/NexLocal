@@ -57,7 +57,9 @@ class User extends Authenticatable {
     {
         return [
             'email_verified_at' => 'datetime',
-            'identity_verified_at' => 'datetime', // Añadir casteo
+            'identity_verified_at' => 'datetime',
+            'suspended_at' => 'datetime',
+            'is_suspended' => 'boolean',
             'password' => 'hashed',
         ];
     }

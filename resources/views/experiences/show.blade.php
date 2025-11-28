@@ -7,7 +7,7 @@
 
                 {{-- Imagen Principal --}}
                 <div class="relative overflow-hidden rounded-lg shadow-lg" style="padding-bottom: 56.25%;"> {{-- Aspect Ratio 16:9 --}}
-                    <img src="{{ $experience->image_path ? Storage::url($experience->image_path) : 'https://placehold.co/1200x675/e2e8f0/94a3b8?text=NexLocal' }}"
+                    <img src="{{ $experience->image_path ? asset('storage/' . $experience->image_path) : 'https://placehold.co/1200x675/e2e8f0/94a3b8?text=NexLocal' }}"
                          alt="{{ $experience->title }}"
                          class="absolute top-0 left-0 w-full h-full object-cover">
 

@@ -135,6 +135,92 @@
 
         {{-- Scripts adicionales si son necesarios --}}
         @stack('scripts')
+
+        <script>
+            // Datos de Departamentos y Municipios de Colombia
+            const colombiaData = [
+                { "id": 0, "departamento": "Amazonas", "ciudades": ["Leticia", "Puerto Nariño"] },
+                { "id": 1, "departamento": "Antioquia", "ciudades": ["Medellín", "Bello", "Itagüí", "Envigado", "Apartadó", "Rionegro", "Turbo", "Caucasia"] },
+                { "id": 2, "departamento": "Arauca", "ciudades": ["Arauca", "Arauquita", "Saravena", "Tame"] },
+                { "id": 3, "departamento": "Atlántico", "ciudades": ["Barranquilla", "Soledad", "Malambo", "Sabanalarga", "Baranoa"] },
+                { "id": 4, "departamento": "Bolívar", "ciudades": ["Cartagena", "Magangué", "El Carmen de Bolívar", "Turbaco", "Arjona"] },
+                { "id": 5, "departamento": "Boyacá", "ciudades": ["Tunja", "Duitama", "Sogamoso", "Chiquinquirá", "Paipa"] },
+                { "id": 6, "departamento": "Caldas", "ciudades": ["Manizales", "La Dorada", "Chinchiná", "Villamaría", "Riosucio"] },
+                { "id": 7, "departamento": "Caquetá", "ciudades": ["Florencia", "San Vicente del Caguán"] },
+                { "id": 8, "departamento": "Casanare", "ciudades": ["Yopal", "Aguazul", "Villanueva"] },
+                { "id": 9, "departamento": "Cauca", "ciudades": ["Popayán", "Santander de Quilichao", "Puerto Tejada"] },
+                { "id": 10, "departamento": "Cesar", "ciudades": ["Valledupar", "Aguachica", "Agustín Codazzi"] },
+                { "id": 11, "departamento": "Chocó", "ciudades": ["Quibdó", "Istmina"] },
+                { "id": 12, "departamento": "Córdoba", "ciudades": ["Montería", "Cereté", "Sahagún", "Lorica", "Montelíbano", "Planeta Rica", "Ciénaga de Oro", "Tierralta"] },
+                { "id": 13, "departamento": "Cundinamarca", "ciudades": ["Bogotá", "Soacha", "Fusagasugá", "Facatativá", "Zipaquirá", "Chía", "Girardot", "Mosquera"] },
+                { "id": 14, "departamento": "Guainía", "ciudades": ["Inírida"] },
+                { "id": 15, "departamento": "Guaviare", "ciudades": ["San José del Guaviare"] },
+                { "id": 16, "departamento": "Huila", "ciudades": ["Neiva", "Pitalito", "Garzón", "La Plata"] },
+                { "id": 17, "departamento": "La Guajira", "ciudades": ["Riohacha", "Maicao", "Uribia", "Manaure"] },
+                { "id": 18, "departamento": "Magdalena", "ciudades": ["Santa Marta", "Ciénaga", "Zona Bananera", "Plato"] },
+                { "id": 19, "departamento": "Meta", "ciudades": ["Villavicencio", "Acacías", "Granada"] },
+                { "id": 20, "departamento": "Nariño", "ciudades": ["Pasto", "Tumaco", "Ipiales"] },
+                { "id": 21, "departamento": "Norte de Santander", "ciudades": ["Cúcuta", "Ocaña", "Villa del Rosario", "Los Patios"] },
+                { "id": 22, "departamento": "Putumayo", "ciudades": ["Mocoa", "Puerto Asís"] },
+                { "id": 23, "departamento": "Quindío", "ciudades": ["Armenia", "Calarcá", "La Tebaida", "Montenegro"] },
+                { "id": 24, "departamento": "Risaralda", "ciudades": ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"] },
+                { "id": 25, "departamento": "San Andrés y Providencia", "ciudades": ["San Andrés", "Providencia"] },
+                { "id": 26, "departamento": "Santander", "ciudades": ["Bucaramanga", "Floridablanca", "Barrancabermeja", "Girón", "Piedecuesta", "San Gil"] },
+                { "id": 27, "departamento": "Sucre", "ciudades": ["Sincelejo", "Corozal", "San Marcos"] },
+                { "id": 28, "departamento": "Tolima", "ciudades": ["Ibagué", "Espinal", "Melgar", "Chaparral"] },
+                { "id": 29, "departamento": "Valle del Cauca", "ciudades": ["Cali", "Buenaventura", "Palmira", "Tuluá", "Yumbo", "Cartago", "Jamundí", "Buga"] },
+                { "id": 30, "departamento": "Vaupés", "ciudades": ["Mitú"] },
+                { "id": 31, "departamento": "Vichada", "ciudades": ["Puerto Carreño"] }
+            ];
+
+            function locationHandler(initialValue = '') {
+                let initialDept = '';
+                let initialCity = '';
+
+                // Si hay un valor inicial (ej: "Cereté, Córdoba"), intentamos separarlo
+                if (initialValue && initialValue.includes(',')) {
+                    const parts = initialValue.split(',').map(s => s.trim());
+                    if (parts.length >= 2) {
+                        initialCity = parts[0]; // Cereté
+                        initialDept = parts[1]; // Córdoba
+                    }
+                }
+
+                return {
+                    departments: colombiaData,
+                    municipalities: [],
+                    selectedDept: initialDept,
+                    selectedCity: initialCity,
+                    fullLocation: initialValue,
+
+                    init() {
+                        // Si ya había un departamento seleccionado al cargar, llenar los municipios
+                        if (this.selectedDept) {
+                            this.updateMunicipalities(false); // false para no borrar la ciudad seleccionada
+                        }
+                    },
+
+                    updateMunicipalities(resetCity = true) {
+                        const deptData = this.departments.find(d => d.departamento === this.selectedDept);
+                        this.municipalities = deptData ? deptData.ciudades : [];
+
+                        if (resetCity) {
+                            this.selectedCity = '';
+                            this.updateFullLocation();
+                        }
+                    },
+
+                    updateFullLocation() {
+                        if (this.selectedDept && this.selectedCity) {
+                            this.fullLocation = `${this.selectedCity}, ${this.selectedDept}`;
+                        } else {
+                            this.fullLocation = '';
+                        }
+                    }
+                };
+            }
+        </script>
+    </body>
     </body>
 </html>
 

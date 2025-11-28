@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="space-y-8">
 
-                {{-- Alerta de Verificación --}}
+                {{-- Alerta de Verificación (Sin cambios) --}}
                 @if(!Auth::user()->isVerifiedGuide())
                     <div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-l-4 border-yellow-500 p-6 rounded-lg shadow-lg">
                         <div class="flex items-start">
@@ -70,8 +70,9 @@
                     <div class="p-6 bg-white dark:bg-gray-800 shadow-lg rounded-2xl border dark:border-gray-700">
                         <div class="flex items-center space-x-4">
                             <div class="p-3 rounded-full bg-green-100 dark:bg-green-900">
+                                {{-- NUEVO ICONO DE EXPERIENCIAS (MAPA) --}}
                                 <svg class="h-6 w-6 text-green-600 dark:text-green-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.536M11.121 12.818.879 11.464M12 6H5.25M12 6h6.75M12 6v3.75m0 6V21m-3-2.818.879.536M12 18.182.879 16.828M21 12h-3.75m.75 3h3.75M21 12v-3.75m0 6V21m-3-2.818.879.536M12 18.182.879 16.828" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                                 </svg>
                             </div>
                             <div>
@@ -89,7 +90,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Reservas Totales</p>
-                                <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $guideBookings->count() }}</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $guideBookings->total() }}</p>
                             </div>
                         </div>
                     </div>
@@ -182,6 +183,49 @@
                 {{-- 3. Próximas Reservas (Vista del Guía) --}}
                 <div>
                     <h3 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Gestión de Reservas</h3>
+
+                    {{-- FILTROS DE BÚSQUEDA CENTRADOS --}}
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 mb-4">
+                        <form method="GET" action="{{ route('dashboard') }}" class="flex flex-col sm:flex-row justify-center items-center gap-4">
+
+                            {{-- Input de Búsqueda --}}
+                            <div class="w-full sm:w-auto">
+                                <x-text-input
+                                    type="text"
+                                    name="search"
+                                    placeholder="Buscar turista o experiencia..."
+                                    value="{{ request('search') }}"
+                                    class="w-full sm:w-64"
+                                />
+                            </div>
+
+                            {{-- Select de Estado --}}
+                            <div class="w-full sm:w-auto">
+                                <select name="status" class="w-full sm:w-48 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                    <option value="">Todos los estados</option>
+                                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pendiente</option>
+                                    <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Confirmada</option>
+                                    <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>En Curso</option>
+                                    <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completada</option>
+                                    <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelada</option>
+                                </select>
+                            </div>
+
+                            {{-- Botones de Acción --}}
+                            <div class="flex gap-2 w-full sm:w-auto justify-center">
+                                <x-primary-button type="submit">
+                                    Filtrar
+                                </x-primary-button>
+
+                                @if(request()->has('search') || request()->has('status'))
+                                    <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-600 transition ease-in-out duration-150">
+                                        Limpiar
+                                    </a>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border dark:border-gray-700">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -230,159 +274,222 @@
                                         {{ $statusText[$booking->status] ?? ucfirst($booking->status) }}
                                     </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-y-2 flex flex-col items-start">
-
-                                            {{-- Botón para abrir chat --}}
-                                            @if(in_array($booking->status, ['pending', 'confirmed', 'in_progress', 'completed']))
+                                        {{-- COLUMNA DE ACCIONES MEJORADA --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div class="flex flex-col gap-2 min-w-[140px]">
+                                                {{-- Botón para Ver Detalles --}}
                                                 <button type="button"
-                                                        onclick="openChatFromBooking({{ $booking->id }}, '{{ $booking->user->name }}', '{{ $booking->experience->title }}', '{{ $booking->status }}')"
-                                                        class="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold">
-                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                                    </svg>
-                                                    Chatear con turista
+                                                        x-data=""
+                                                        x-on:click.prevent="$dispatch('open-modal', 'booking-details-{{ $booking->id }}')"
+                                                        class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xs font-medium">
+                                                    Ver Detalles
                                                 </button>
-                                            @endif
 
-                                            {{-- --- INICIO: NUEVO BOTÓN Y MODAL --- --}}
-                                            <button type="button"
-                                                    x-data=""
-                                                    x-on:click.prevent="$dispatch('open-modal', 'booking-details-{{ $booking->id }}')"
-                                                    class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold">
-                                                Ver Detalles
-                                            </button>
-                                            {{-- --- FIN: NUEVO BOTÓN Y MODAL --- --}}
-
-
-                                            {{-- --- INICIO: LÓGICA DE BOTONES (GUÍA) --- --}}
-
-                                            {{-- 1. Acciones para 'pending' --}}
-                                            @if($booking->status === 'pending')
-                                                <form action="{{ route('bookings.status', $booking) }}" method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <input type="hidden" name="status" value="confirmed">
-                                                    <button type="submit" class="text-xs text-green-600 dark:text-green-400 hover:underline font-semibold">Confirmar Reserva</button>
-                                                </form>
-                                                <form action="{{ route('bookings.status', $booking) }}" method="POST" onsubmit="return confirm('¿Rechazar esta reserva? El cupo será devuelto.');">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <input type="hidden" name="status" value="cancelled">
-                                                    <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">Rechazar</button>
-                                                </form>
-
-                                                {{-- 2. Acciones para 'confirmed' (y futura) --}}
-                                            @elseif($booking->status === 'confirmed' && $booking->availabilitySlot && $booking->availabilitySlot->start_time > now())
-                                                <form action="{{ route('bookings.status', $booking) }}" method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <input type="hidden" name="status" value="in_progress">
-                                                    <button type="submit" class="text-xs text-cyan-600 dark:text-cyan-400 hover:underline font-semibold">Iniciar Experiencia (Manual)</button>
-                                                </form>
-                                                <form action="{{ route('bookings.status', $booking) }}" method="POST" onsubmit="return confirm('¿Cancelar esta reserva? El cupo será devuelto.');">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <input type="hidden" name="status" value="cancelled">
-                                                    <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">Cancelar</button>
-                                                </form>
-
-                                                {{-- 3. Acciones para 'in_progress' --}}
-                                            @elseif($booking->status === 'in_progress')
-                                                @if($booking->guide_confirmed_completed)
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400">Esperando al turista...</span>
-                                                @else
-                                                    <form action="{{ route('bookings.markAsCompleted', $booking) }}" method="POST" onsubmit="return confirm('¿Confirmas que la experiencia ha finalizado?');">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold">
-                                                        Marcar como Completada
-                                                        </button>
-                                                    </form>
+                                                {{-- Botón para abrir chat --}}
+                                                @if(in_array($booking->status, ['pending', 'confirmed', 'in_progress', 'completed']))
+                                                    <button type="button"
+                                                            onclick="openChatFromBooking({{ $booking->id }}, '{{ $booking->user->name }}', '{{ $booking->experience->title }}', '{{ $booking->status }}')"
+                                                            class="w-full inline-flex justify-center items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors text-xs font-semibold">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                        </svg>
+                                                        Chatear
+                                                    </button>
                                                 @endif
 
-                                                {{-- 4. Sin acciones para 'completed' o 'cancelled' --}}
-                                            @elseif($booking->status === 'completed')
-                                                <span class="text-xs text-gray-500 dark:text-gray-400">Finalizada</span>
-                                            @elseif($booking->status === 'cancelled')
-                                                <span class="text-xs text-gray-500 dark:text-gray-400">Cancelada</span>
-                                            @endif
-                                            {{-- --- FIN: LÓGICA DE BOTONES (GUÍA) --- --}}
+                                                {{-- 1. Acciones para 'pending' --}}
+                                                @if($booking->status === 'pending')
+                                                    <form action="{{ route('bookings.status', $booking) }}" method="POST" class="w-full">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="confirmed">
+                                                        <button type="submit" class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md shadow-sm transition-colors text-xs font-bold">
+                                                            Confirmar Reserva
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('bookings.status', $booking) }}" method="POST" onsubmit="return confirm('¿Rechazar esta reserva? El cupo será devuelto.');" class="w-full">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="cancelled">
+                                                        <button type="submit" class="w-full inline-flex justify-center items-center px-3 py-1.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-xs font-medium">
+                                                            Rechazar
+                                                        </button>
+                                                    </form>
+
+                                                    {{-- 2. Acciones para 'confirmed' --}}
+                                                @elseif($booking->status === 'confirmed' && $booking->availabilitySlot && $booking->availabilitySlot->start_time > now())
+                                                    <form action="{{ route('bookings.status', $booking) }}" method="POST" class="w-full">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="in_progress">
+                                                        <button type="submit" class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-md shadow-sm transition-colors text-xs font-bold">
+                                                            Iniciar Experiencia
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('bookings.status', $booking) }}" method="POST" onsubmit="return confirm('¿Cancelar esta reserva? El cupo será devuelto.');" class="w-full">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="cancelled">
+                                                        <button type="submit" class="w-full inline-flex justify-center items-center px-3 py-1.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-xs font-medium">
+                                                            Cancelar
+                                                        </button>
+                                                    </form>
+
+                                                    {{-- 3. Acciones para 'in_progress' --}}
+                                                @elseif($booking->status === 'in_progress')
+                                                    @if($booking->guide_confirmed_completed)
+                                                        <span class="w-full text-center text-xs text-gray-500 dark:text-gray-400 italic">Esperando confirmación del turista...</span>
+                                                    @else
+                                                        <form action="{{ route('bookings.markAsCompleted', $booking) }}" method="POST" onsubmit="return confirm('¿Confirmas que la experiencia ha finalizado?');" class="w-full">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm transition-colors text-xs font-bold">
+                                                                Marcar Completada
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
+                                                    {{-- 4. Estados Finales --}}
+                                                @elseif($booking->status === 'completed')
+                                                    <span class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 rounded-md text-xs">Finalizada</span>
+                                                @elseif($booking->status === 'cancelled')
+                                                    <span class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 rounded-md text-xs">Cancelada</span>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
 
-                                    {{-- --- INICIO: DEFINICIÓN DEL MODAL --- --}}
-                                    {{-- Este modal se crea por cada reserva en el bucle --}}
-                                    <x-modal name="booking-details-{{ $booking->id }}" maxWidth="xl" focusable>
-                                        <div class="p-6 dark:bg-gray-800">
-                                            <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                                Detalles de la Reserva
-                                            </h2>
+                                    {{-- --- MODAL DE DETALLES MEJORADO (DISEÑO PROFESIONAL) --- --}}
+                                    <x-modal name="booking-details-{{ $booking->id }}" maxWidth="2xl" focusable>
+                                        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
 
-                                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                                Experiencia: <span class="font-medium text-gray-800 dark:text-gray-200">{{ $booking->experience->title }}</span>
-                                            </p>
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-b dark:border-gray-700 flex justify-between items-center">
+                                                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                                    <svg class="h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+                                                    </svg>
+                                                    Reserva #{{ $booking->id }}
+                                                </h2>
 
-                                            {{-- Información del Turista --}}
-                                            <div class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
-                                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Información del Turista</h3>
-                                                <div class="mt-2 space-y-1 text-gray-700 dark:text-gray-300">
-                                                    <p><span class="font-semibold">Nombre:</span> {{ $booking->user->name }}</p>
-                                                    <p><span class="font-semibold">Email:</span> {{ $booking->user->email }}</p>
-                                                </div>
+                                                {{-- Badge Estado --}}
+                                                <span class="px-3 py-1 text-sm font-bold rounded-full border {{ $statusClasses[$booking->status] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                                                    {{ $statusText[$booking->status] ?? ucfirst($booking->status) }}
+                                                </span>
                                             </div>
 
-                                            {{-- Detalles del Evento (Según lo solicitado) --}}
-                                            <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-                                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Detalles del Evento</h3>
-                                                <div class="mt-2 space-y-2 text-gray-700 dark:text-gray-300">
-                                                    <p>
-                                                        <span class="font-semibold block">Fecha y Hora de Encuentro:</span>
-                                                        @if ($booking->availabilitySlot)
-                                                            <span class="text-lg">{{ $booking->availabilitySlot->start_time->locale('es')->translatedFormat('l, j \de F \de Y - h:i A') }}</span>
-                                                        @else
-                                                            <span class="text-red-500">Horario no disponible</span>
+                                            <div class="p-6 space-y-6">
+
+                                                <div class="flex items-start gap-4 p-4 rounded-xl bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30">
+                                                    <img class="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                                                         src="{{ $booking->experience?->image_path ? asset('storage/' . $booking->experience->image_path) : 'https://placehold.co/100x100/e2e8f0/94a3b8?text=NexLocal' }}"
+                                                         alt="Experiencia">
+                                                    <div>
+                                                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight mb-1">{{ $booking->experience->title }}</h3>
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                                            {{ $booking->experience->location }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                                    <div class="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-xl border dark:border-gray-700">
+                                                        <h4 class="text-xs font-bold uppercase text-gray-400 dark:text-gray-500 mb-4 tracking-wider border-b dark:border-gray-700 pb-2">Turista</h4>
+
+                                                        <div class="flex items-center gap-3 mb-4">
+                                                            @if($booking->user->profile_photo_path)
+                                                                <img src="{{ asset('storage/' . $booking->user->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+                                                            @else
+                                                                <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">
+                                                                    {{ substr($booking->user->name, 0, 1) }}
+                                                                </div>
+                                                            @endif
+                                                            <div>
+                                                                <p class="font-bold text-gray-900 dark:text-gray-100">{{ $booking->user->name }}</p>
+                                                                <p class="text-xs text-gray-500 dark:text-gray-400 break-all">{{ $booking->user->email }}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        @if(in_array($booking->status, ['pending', 'confirmed', 'in_progress', 'completed']))
+                                                            <button type="button"
+                                                                    onclick="openChatFromBooking({{ $booking->id }}, '{{ $booking->user->name }}', '{{ $booking->experience->title }}', '{{ $booking->status }}'); $dispatch('close');"
+                                                                    class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition shadow-sm">
+                                                                <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                                                Enviar Mensaje
+                                                            </button>
                                                         @endif
-                                                    </p>
+                                                    </div>
 
-                                                    {{-- /// --- CORRECCIÓN: Usar 'quantity' (columna correcta de la BD) --- /// --}}
-                                                    <p>
-                                                        <span class="font-semibold block">Cantidad de Turistas:</span>
-                                                        <span class="text-lg">{{ $booking->num_travelers }} {{ Str::plural('turista', $booking->num_travelers) }}</span>
-                                                    </p>
-                                                    {{-- /// --- FIN CORRECCIÓN --- /// --}}
+                                                    <div class="space-y-4">
+                                                        <h4 class="text-xs font-bold uppercase text-gray-400 dark:text-gray-500 mb-2 tracking-wider border-b dark:border-gray-700 pb-2">Detalles del Evento</h4>
 
-                                                    <p>
-                                                        <span class="font-semibold block">Precio Total de la Reserva:</span>
-                                                        <span class="text-lg">${{ number_format($booking->total_amount, 0, ',', '.') }} COP</span>
-                                                    </p>
-                                                    <p>
-                                                        <span class="font-semibold block">Fecha en que se Reservó:</span>
-                                                        <span class="text-lg">{{ $booking->created_at->locale('es')->translatedFormat('l, j \de F \de Y, h:i A') }}</span>
-                                                    </p>
+                                                        <div class="flex items-start gap-3">
+                                                            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 flex-shrink-0">
+                                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Fecha y Hora</p>
+                                                                @if ($booking->availabilitySlot)
+                                                                    <p class="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                                                                        {{ $booking->availabilitySlot->start_time->locale('es')->translatedFormat('l, j \de F') }}
+                                                                    </p>
+                                                                    <p class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                                                                        {{ $booking->availabilitySlot->start_time->format('h:i A') }}
+                                                                    </p>
+                                                                @else
+                                                                    <span class="text-red-500 text-sm font-medium">Horario no disponible</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex items-center gap-3">
+                                                            <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 flex-shrink-0">
+                                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Asistentes</p>
+                                                                <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $booking->num_travelers }} Personas</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex items-center gap-3">
+                                                            <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 flex-shrink-0">
+                                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Total Recibido</p>
+                                                                <p class="font-bold text-emerald-600 dark:text-emerald-400 text-lg">$ {{ number_format($booking->total_amount, 0, ',', '.') }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
+
+                                                <div class="text-xs text-center text-gray-400 pt-2">
+                                                    Reserva realizada el {{ $booking->created_at->locale('es')->translatedFormat('d M Y, h:i A') }}
+                                                </div>
+
                                             </div>
 
-                                            {{-- Botón de Cierre --}}
-                                            <div class="mt-6 flex justify-end">
+                                            <div class="bg-gray-50 dark:bg-gray-700/30 px-6 py-4 flex justify-end">
                                                 <x-secondary-button x-on:click="$dispatch('close')">
                                                     Cerrar
                                                 </x-secondary-button>
                                             </div>
                                         </div>
                                     </x-modal>
-                                    {{-- --- FIN: DEFINICIÓN DEL MODAL --- --}}
+                                    {{-- --- FIN MODAL MEJORADO --- --}}
 
                                 @empty
                                     <tr>
                                         <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                            Aún no has recibido ninguna reserva para tus experiencias.
+                                            No se encontraron reservas con los filtros seleccionados.
                                         </td>
                                     </tr>
                                 @endforelse
                                 </tbody>
                             </table>
                         </div>
-                        <!-- Paginación para las reservas del guía -->
                         <div class="p-4 border-t dark:border-gray-700">
                             {{ $guideBookings->links() }}
                         </div>
@@ -394,24 +501,20 @@
     </div>
 
     @push('scripts')
-    <script>
-        function openChatFromBooking(bookingId, userName, experienceTitle, bookingStatus) {
-            // Crear objeto de conversación
-            const conversation = {
-                booking_id: bookingId,
-                other_user: {
-                    name: userName
-                },
-                experience_title: experienceTitle,
-                booking_status: bookingStatus
-            };
-
-            // Disparar evento para abrir la ventana de chat
-            window.dispatchEvent(new CustomEvent('open-chat-window', {
-                detail: conversation
-            }));
-        }
-    </script>
+        <script>
+            function openChatFromBooking(bookingId, userName, experienceTitle, bookingStatus) {
+                const conversation = {
+                    booking_id: bookingId,
+                    other_user: {
+                        name: userName
+                    },
+                    experience_title: experienceTitle,
+                    booking_status: bookingStatus
+                };
+                window.dispatchEvent(new CustomEvent('open-chat-window', {
+                    detail: conversation
+                }));
+            }
+        </script>
     @endpush
 </x-app-layout>
-

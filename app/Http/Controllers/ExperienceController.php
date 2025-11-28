@@ -175,7 +175,11 @@ class ExperienceController extends Controller
             abort(403, 'No tienes permiso para editar esta experiencia.');
         }
 
-        $experience->load('availabilitySlots');
+        // --- CAMBIO AQUÍ: Solo cargar horarios que aún no han pasado ---
+        $experience->load(['availabilitySlots' => function ($query) {
+            $query->where('start_time', '>=', now()) // Filtra los antiguos
+            ->orderBy('start_time', 'asc');    // Los ordena cronológicamente
+        }]);
 
         $categories = ['Cultural', 'Gastronómica', 'Naturaleza', 'Aventura', 'Histórica', 'Rural'];
         return view('experiences.edit', compact('experience', 'categories'));

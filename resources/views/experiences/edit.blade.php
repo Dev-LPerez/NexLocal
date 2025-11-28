@@ -92,9 +92,37 @@
 
                         {{-- Ubicación, Precio y Duración --}}
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <x-input-label for="location" value="Ubicación *" />
-                                <x-text-input type="text" name="location" id="location" class="mt-1 block w-full" placeholder="Ej: Cereté, Córdoba" :value="old('location', $experience->location)" required />
+                            {{-- SELECCIÓN DE UBICACIÓN (DEPARTAMENTO Y MUNICIPIO) --}}
+                            <div x-data="locationHandler('{{ old('location', $experience->location) }}')">
+                                <x-input-label value="Ubicación *" class="mb-1" />
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {{-- Select Departamento --}}
+                                    <div>
+                                        <select x-model="selectedDept" @change="updateMunicipalities()"
+                                                class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                            <option value="">Departamento</option>
+                                            <template x-for="dept in departments" :key="dept.id">
+                                                <option :value="dept.departamento" x-text="dept.departamento"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    {{-- Select Municipio --}}
+                                    <div>
+                                        <select x-model="selectedCity" @change="updateFullLocation()"
+                                                class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                                :disabled="!selectedDept">
+                                            <option value="">Municipio</option>
+                                            <template x-for="city in municipalities" :key="city">
+                                                <option :value="city" x-text="city"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {{-- Input Oculto --}}
+                                <input type="hidden" name="location" id="location" :value="fullLocation">
                                 <x-input-error :messages="$errors->get('location')" class="mt-1"/>
                             </div>
                             <div>
@@ -102,9 +130,18 @@
                                 <x-text-input type="number" name="price" id="price" step="100" min="0" class="mt-1 block w-full" placeholder="Ej: 50000" :value="old('price', $experience->price)" required />
                                 <x-input-error :messages="$errors->get('price')" class="mt-1"/>
                             </div>
+                            {{-- CAMPO DURACIÓN (SELECT) --}}
                             <div>
                                 <x-input-label for="duration" value="Duración *" />
-                                <x-text-input type="text" name="duration" id="duration" class="mt-1 block w-full" placeholder="Ej: 3 horas / Medio día" :value="old('duration', $experience->duration)" required />
+                                <div class="relative mt-1">
+                                    <select name="duration" id="duration" class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm cursor-pointer" required>
+                                        <option value="" disabled>Selecciona la duración</option>
+                                        @foreach(['30 Minutos', '1 Hora', '1.5 Horas', '2 Horas', '2.5 Horas', '3 Horas', '4 Horas', '5 Horas', '6 Horas', '7 Horas', '8 Horas', '10 Horas', '12 Horas', 'Medio Día', 'Día Completo'] as $time)
+                                            {{-- El select verifica si el valor guardado coincide con la opción para seleccionarla --}}
+                                            <option value="{{ $time }}" {{ old('duration', $experience->duration) == $time ? 'selected' : '' }}>{{ $time }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <x-input-error :messages="$errors->get('duration')" class="mt-1"/>
                             </div>
                         </div>
@@ -193,45 +230,94 @@
                             </div>
                         </div>
                         {{-- HORARIOS DISPONIBLES --}}
-                        <div class="space-y-4 pt-4 border-t dark:border-gray-700">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Horarios Disponibles</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Añade o edita las fechas y horas específicas en que ofreces esta experiencia.</p>
+                        {{-- HORARIOS DISPONIBLES (DISEÑO MEJORADO) --}}
+                        <div class="space-y-6 pt-8 border-t dark:border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <svg class="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Horarios Disponibles
+                                    </h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                        Define cuándo ocurrirá tu experiencia. Puedes agregar múltiples fechas.
+                                    </p>
+                                </div>
+                                <span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-full border border-indigo-100 dark:border-indigo-800">
+                                    <span x-text="slots.length"></span> Horarios activos
+                                </span>
+                            </div>
 
-                            <div class="space-y-3">
-                                {{-- Ahora esto funcionará --}}
+                            <div class="space-y-4">
+                                {{-- Loop de Horarios con AlpineJS --}}
                                 <template x-for="(slot, index) in slots" :key="index">
-                                    <div class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-md border dark:border-gray-700">
+                                    <div class="group relative bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-200">
+
+                                        {{-- Botón Eliminar (Flotante) --}}
+                                        <button type="button" @click="slots.splice(index, 1)"
+                                                class="absolute top-4 right-4 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                title="Eliminar este horario">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+
                                         <input type="hidden" x-bind:name="`slots[${index}][id]`" x-model="slot.id">
 
-                                        <div class="flex-1">
-                                            <x-input-label x-bind:for="`slot_start_time_${index}`" value="Fecha y Hora de Inicio *" />
-                                            <x-text-input type="datetime-local"
-                                                          x-bind:name="`slots[${index}][start_time]`"
-                                                          x-bind:id="`slot_start_time_${index}`"
-                                                          class="mt-1 block w-full"
-                                                          x-model="slot.start_time" required />
-                                        </div>
-                                        <div class="w-1/4">
-                                            <x-input-label x-bind:for="`slot_max_slots_${index}`" value="Cupos *" />
-                                            <x-text-input type="number"
-                                                          x-bind:name="`slots[${index}][max_slots]`"
-                                                          x-bind:id="`slot_max_slots_${index}`"
-                                                          class="mt-1 block w-full" min="1"
-                                                          x-model="slot.max_slots" required />
-                                        </div>
-                                        <div>
-                                            <x-danger-button type="button" @click="slots.splice(index, 1)" class="mt-6 !p-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                            </x-danger-button>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pr-8"> {{-- pr-8 para no tapar el botón borrar --}}
+
+                                            {{-- Campo Fecha y Hora --}}
+                                            <div>
+                                                <x-input-label x-bind:for="`slot_start_time_${index}`" value="Fecha y Hora de Inicio" class="!text-gray-500 dark:!text-gray-400 !text-xs !uppercase !tracking-wider !font-bold !mb-2" />
+                                                <div class="relative">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </div>
+                                                    <x-text-input type="datetime-local"
+                                                                  x-bind:name="`slots[${index}][start_time]`"
+                                                                  x-bind:id="`slot_start_time_${index}`"
+                                                                  class="pl-10 block w-full bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
+                                                                  x-model="slot.start_time" required />
+                                                </div>
+                                            </div>
+
+                                            {{-- Campo Cupos --}}
+                                            <div>
+                                                <x-input-label x-bind:for="`slot_max_slots_${index}`" value="Cupos Disponibles" class="!text-gray-500 dark:!text-gray-400 !text-xs !uppercase !tracking-wider !font-bold !mb-2" />
+                                                <div class="relative">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                        </svg>
+                                                    </div>
+                                                    <x-text-input type="number"
+                                                                  x-bind:name="`slots[${index}][max_slots]`"
+                                                                  x-bind:id="`slot_max_slots_${index}`"
+                                                                  class="pl-10 block w-full bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
+                                                                  min="1"
+                                                                  placeholder="Ej: 10"
+                                                                  x-model="slot.max_slots" required />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </template>
-                            </div>
 
-                            {{-- Y esto también funcionará --}}
-                            <x-secondary-button type="button" @click="slots.push({ id: null, start_time: '', max_slots: 10 })">
-                                + Agregar Horario
-                            </x-secondary-button>
+                                {{-- Botón Agregar (Estilo Dashed) --}}
+                                <button type="button"
+                                        @click="slots.push({ id: null, start_time: '', max_slots: 10 })"
+                                        class="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 dark:text-gray-400 hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all duration-200 flex flex-col items-center justify-center gap-2 group">
+                                    <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-full group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
+                                        <svg class="w-6 h-6 text-gray-400 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </div>
+                                    <span class="font-medium">Agregar nueva fecha</span>
+                                </button>
+                            </div>
                         </div>
 
                         {{-- Botones --}}

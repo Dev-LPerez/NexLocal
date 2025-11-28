@@ -158,7 +158,7 @@
                 <div class="group relative rounded-custom bg-gradient-to-br from-primary to-accent p-8 shadow-primary-lg transition-transform hover:scale-105">
                     <h3 class="text-2xl font-medium text-white">¿Eres un guía local?</h3>
                     <p class="mt-2 text-white/80">Comparte tu pasión por nuestra tierra y genera ingresos convirtiéndote en anfitrión en NexLocal.</p>
-                    <a href="#" class="mt-6 inline-block rounded-full bg-white px-6 py-2 font-medium text-primary transition-transform group-hover:scale-110">
+                    <a href="{{ route('register') }}" class="mt-6 inline-block rounded-full bg-white px-6 py-2 font-medium text-primary transition-transform group-hover:scale-110">
                         Conviértete en anfitrión
                     </a>
                 </div>

@@ -112,7 +112,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])
 
         // Auditoría y Logs
         Route::get('/audit/bookings', [\App\Http\Controllers\AdminController::class, 'bookingsAudit'])->name('audit.bookings');
-    })
+    });
 
     Route::get('/deploy-data', function () {
 

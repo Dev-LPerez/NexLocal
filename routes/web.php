@@ -10,7 +10,6 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AccountSuspendedController;
-use Illuminate\Support\Facades\Artisan;
 
 // --- Ruta Pública Principal ---
 Route::get('/', [ExperienceController::class, 'index'])->name('home');
@@ -113,16 +112,6 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])
         // Auditoría y Logs
         Route::get('/audit/bookings', [\App\Http\Controllers\AdminController::class, 'bookingsAudit'])->name('audit.bookings');
     });
-
-Route::get('/seed-data', function () {
-    // 1. Limpiar base de datos (opcional, para evitar duplicados)
-    Artisan::call('migrate:fresh', ['--force' => true]);
-
-    // 2. Ejecutar los seeders (crear datos falsos)
-    Artisan::call('db:seed', ['--force' => true]);
-
-    return "<h1>¡Datos generados!</h1><p>Se ha reiniciado la base de datos y se han creado datos de prueba.</p><pre>" . Artisan::output() . "</pre><a href='/'>Ir al Inicio</a>";
-});
 
 // --- Rutas de Autenticación ---
 require __DIR__.'/auth.php';

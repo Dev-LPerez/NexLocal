@@ -1,0 +1,52 @@
+[
+    {
+        "id": 1,
+        "experience_id": 1,
+        "user_id": 2,
+        "booking_id": 1,
+        "rating": 5,
+        "comment": "Excelente Guia Apasionante",
+        "created_at": "2025-10-31 15:42:50",
+        "updated_at": "2025-10-31 15:42:50"
+    },
+    {
+        "id": 2,
+        "experience_id": 1,
+        "user_id": 2,
+        "booking_id": 2,
+        "rating": 2,
+        "comment": "Impuntual",
+        "created_at": "2025-10-31 15:45:18",
+        "updated_at": "2025-10-31 15:45:18"
+    },
+    {
+        "id": 3,
+        "experience_id": 1,
+        "user_id": 3,
+        "booking_id": 3,
+        "rating": 4,
+        "comment": "Excelente Experiencia, Guia Muy Puntual.",
+        "created_at": "2025-10-31 15:47:12",
+        "updated_at": "2025-10-31 15:47:12"
+    },
+    {
+        "id": 4,
+        "experience_id": 2,
+        "user_id": 3,
+        "booking_id": 7,
+        "rating": 5,
+        "comment": "Excelente atencion por parte del guia, muchas cosas increibles, sin duda volveria a repetir mas experiencias de este guia",
+        "created_at": "2025-11-16 23:19:02",
+        "updated_at": "2025-11-16 23:19:02"
+    },
+    {
+        "id": 5,
+        "experience_id": 2,
+        "user_id": 2,
+        "booking_id": 8,
+        "rating": 5,
+        "comment": "Perfecta experiencia sin duda recomendada, me gusto el amplio conocimiento del guia, consejo lleven agua extra.",
+        "created_at": "2025-11-22 00:22:42",
+        "updated_at": "2025-11-22 00:22:42"
+    }
+]

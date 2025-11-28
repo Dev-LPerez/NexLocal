@@ -210,9 +210,20 @@ class ExperienceController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
+            // Código modificado: Intentar borrar la imagen vieja sin romper el sistema
             if ($experience->image_path) {
-                Storage::disk('public')->delete($experience->image_path);
+                try {
+                    // Verificar si existe antes de intentar borrar, o capturar el error
+                    if (Storage::disk('public')->exists($experience->image_path)) {
+                        Storage::disk('public')->delete($experience->image_path);
+                    }
+                } catch (\Exception $e) {
+                    // Si falla el borrado (ej. archivo no encontrado), ignoramos el error
+                    // y permitimos que continúe para subir la imagen nueva.
+                    // Log opcional: Log::warning("No se pudo borrar imagen antigua: " . $e->getMessage());
+                }
             }
+
             $path = $request->file('image')->store('experiences', 'public');
             $validatedData['image_path'] = $path;
         }

@@ -114,20 +114,14 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])
         Route::get('/audit/bookings', [\App\Http\Controllers\AdminController::class, 'bookingsAudit'])->name('audit.bookings');
     });
 
-    Route::get('/deploy-data', function () {
+Route::get('/seed-data', function () {
+    // 1. Limpiar base de datos (opcional, para evitar duplicados)
+    Artisan::call('migrate:fresh', ['--force' => true]);
 
+    // 2. Ejecutar los seeders (crear datos falsos)
+    Artisan::call('db:seed', ['--force' => true]);
 
-        // Opción B: Ejecutar tu importador (Solo si subiste los JSONs al repo)
-        Artisan::call('db:import-data');
-
-        return 'Resultado: <br><pre>' . Artisan::output() . '</pre>';
-    });
-
-Route::get('/fix-data', function () {
-    // Forzar que todas las experiencias estén PUBLICADAS
-    $afectadas = \App\Models\Experience::query()->update(['status' => 'published']);
-
-    return "<h1>¡Corrección exitosa!</h1><p>Se han publicado <strong>{$afectadas}</strong> experiencias que estaban ocultas.</p><a href='/'>Volver al Inicio</a>";
+    return "<h1>¡Datos generados!</h1><p>Se ha reiniciado la base de datos y se han creado datos de prueba.</p><pre>" . Artisan::output() . "</pre><a href='/'>Ir al Inicio</a>";
 });
 
 // --- Rutas de Autenticación ---

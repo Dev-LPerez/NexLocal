@@ -20,27 +20,36 @@ class ExperienceController extends Controller
     public function index(Request $request)
     {
         $searchTerm = $request->input('search');
+        $category = $request->input('category'); // <--- Nuevo parámetro
 
         // Solo mostrar experiencias publicadas, destacadas primero
         // Y excluir experiencias de usuarios suspendidos
         $query = Experience::with('user')
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
-            ->publiclyVisible() // Usa el scope que incluye filtro y ordenamiento
+            ->publiclyVisible()
             ->whereHas('user', function ($q) {
                 $q->where('is_suspended', false);
             });
 
+        // --- FILTRO EXACTO POR CATEGORÍA ---
+        if ($category) {
+            $query->where('category', $category);
+        }
+
+        // --- BÚSQUEDA POR TEXTO ---
         if ($searchTerm) {
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('location', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('location', 'like', '%' . $searchTerm . '%')
+                    // Opcional: También buscar en la descripción para ser más flexible
+                    ->orWhere('description', 'like', '%' . $searchTerm . '%');
             });
         }
 
         $experiences = $query->paginate(9)->withQueryString();
 
-        // Datos de restaurantes (simulados)
+        // Datos de restaurantes (simulados) - Esto se mantiene igual
         $restaurants = [
             [
                 'name' => 'El Pescador del Sinú',
@@ -53,10 +62,11 @@ class ExperienceController extends Controller
                 'specialties' => ['Bocachico Frito', 'Viuda de Pescado', 'Mote de Queso'],
                 'image' => 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=800'
             ],
-            // ... (otros restaurantes)
+            // ... otros
         ];
 
-        return view('welcome', compact('experiences', 'restaurants', 'searchTerm'));
+        // Pasamos también la variable $category a la vista
+        return view('welcome', compact('experiences', 'restaurants', 'searchTerm', 'category'));
     }
 
     /**

@@ -123,5 +123,12 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])
         return 'Resultado: <br><pre>' . Artisan::output() . '</pre>';
     });
 
+Route::get('/fix-data', function () {
+    // Forzar que todas las experiencias estén PUBLICADAS
+    $afectadas = \App\Models\Experience::query()->update(['status' => 'published']);
+
+    return "<h1>¡Corrección exitosa!</h1><p>Se han publicado <strong>{$afectadas}</strong> experiencias que estaban ocultas.</p><a href='/'>Volver al Inicio</a>";
+});
+
 // --- Rutas de Autenticación ---
 require __DIR__.'/auth.php';

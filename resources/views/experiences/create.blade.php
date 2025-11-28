@@ -197,7 +197,7 @@
                             </div>
 
                             <div>
-                                <x-file-upload name="image" accept="image/*" maxSize="2MB" required />
+                                <x-file-upload name="image" accept="image/*" maxSize="10MB" required />
                                 <div class="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                                     <div class="flex items-start">
                                         <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">

@@ -29,8 +29,8 @@
                     </div>
                 @endif
                 <div class="flex-1">
-                    <x-file-upload name="profile_photo" accept="image/*" maxSize="2MB" />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPG, PNG o GIF (máx. 2MB)</p>
+                    <x-file-upload name="profile_photo" accept="image/*" maxSize="10MB" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPG, PNG o GIF (máx. 10MB)</p>
                 </div>
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('profile_photo')" />

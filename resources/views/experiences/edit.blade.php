@@ -180,7 +180,7 @@
                                 <img :src="imagePreview" class="h-48 w-auto rounded-md object-cover border dark:border-gray-600">
                             </div>
 
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sube una foto atractiva si deseas reemplazar la actual (máx 2MB).</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sube una foto atractiva si deseas reemplazar la actual (máx 10MB).</p>
                             <x-input-error :messages="$errors->get('image')" class="mt-1"/>
                         </div>
 

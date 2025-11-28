@@ -10,6 +10,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AccountSuspendedController;
+use Illuminate\Support\Facades\Artisan;
 
 // --- Ruta Pública Principal ---
 Route::get('/', [ExperienceController::class, 'index'])->name('home');
@@ -111,6 +112,15 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])
 
         // Auditoría y Logs
         Route::get('/audit/bookings', [\App\Http\Controllers\AdminController::class, 'bookingsAudit'])->name('audit.bookings');
+    })
+
+    Route::get('/deploy-data', function () {
+
+
+        // Opción B: Ejecutar tu importador (Solo si subiste los JSONs al repo)
+        Artisan::call('db:import-data');
+
+        return 'Resultado: <br><pre>' . Artisan::output() . '</pre>';
     });
 
 // --- Rutas de Autenticación ---

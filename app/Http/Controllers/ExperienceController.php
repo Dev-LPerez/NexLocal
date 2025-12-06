@@ -100,7 +100,7 @@ class ExperienceController extends Controller
             'location' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'duration' => 'required|string|max:100',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
             'includes' => 'nullable|string',
             'not_includes' => 'nullable|string',
             'slots' => 'nullable|array',

@@ -32,10 +32,7 @@ class ExperienceController extends Controller
                 $q->where('is_suspended', false);
             });
 
-        // --- FILTRO EXACTO POR CATEGORÍA ---
-        if ($category) {
-            $query->where('category', $category);
-        }
+        // La categoría ahora se filtra en el cliente con Alpine.js (sin recarga de página)
 
         // --- BÚSQUEDA POR TEXTO ---
         if ($searchTerm) {
@@ -47,7 +44,7 @@ class ExperienceController extends Controller
             });
         }
 
-        $experiences = $query->paginate(9)->withQueryString();
+        $experiences = $query->paginate(50)->withQueryString();
 
         // Datos de restaurantes (simulados) - Esto se mantiene igual
         $restaurants = [

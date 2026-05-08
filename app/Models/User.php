@@ -6,12 +6,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 // Importar las relaciones necesarias
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
-class User extends Authenticatable {
-    use HasFactory, Notifiable;
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -119,8 +121,8 @@ class User extends Authenticatable {
     public function isVerifiedGuide(): bool
     {
         return $this->role === 'guide' &&
-               $this->verification_status === 'approved' &&
-               $this->identity_verified_at !== null;
+            $this->verification_status === 'approved' &&
+            $this->identity_verified_at !== null;
     }
 
     /**
@@ -129,7 +131,7 @@ class User extends Authenticatable {
     public function hasPendingVerification(): bool
     {
         return $this->role === 'guide' &&
-               $this->verification_status === 'pending';
+            $this->verification_status === 'pending';
     }
 
     /**
@@ -138,7 +140,7 @@ class User extends Authenticatable {
     public function isVerificationRejected(): bool
     {
         return $this->role === 'guide' &&
-               $this->verification_status === 'rejected';
+            $this->verification_status === 'rejected';
     }
 
     /**
@@ -169,5 +171,16 @@ class User extends Authenticatable {
         $this->suspension_reason = null;
         $this->suspended_at = null;
         $this->save();
+    }
+
+    public function localBusiness()
+    {
+        return $this->hasOne(LocalBusiness::class);
+    }
+
+    public function orders()
+    {
+        // Pedidos que ha hecho este usuario como turista
+        return $this->hasMany(Order::class);
     }
 }

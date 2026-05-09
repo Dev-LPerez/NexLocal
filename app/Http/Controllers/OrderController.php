@@ -29,7 +29,15 @@ class OrderController extends Controller
 
             // Procesar cada ítem para calcular el total consultando los precios en la BD
             foreach ($items as $itemData) {
-                $product = Product::findOrFail($itemData['product_id']);
+                // Usar lockForUpdate para evitar race conditions
+                $product = Product::lockForUpdate()->findOrFail($itemData['product_id']);
+                
+                $quantity = $itemData['quantity'];
+
+                // Verificar stock
+                if (!$product->hasStock($quantity)) {
+                    throw new \Exception("Stock insuficiente para '{$product->name}'.");
+                }
 
                 // Si es el primer producto, establecemos el negocio del pedido
                 if ($localBusinessId === null) {
@@ -39,9 +47,16 @@ class OrderController extends Controller
                     throw new \Exception('No puedes agregar productos de distintos emprendimientos en un mismo pedido.');
                 }
 
-                $quantity = $itemData['quantity'];
                 $unitPrice = $product->price;
                 $totalAmount += ($unitPrice * $quantity);
+
+                // Descontar stock
+                if ($product->stock !== null) {
+                    $product->decrement('stock', $quantity);
+                    if ($product->fresh()->stock === 0) {
+                        $product->update(['is_available' => false]);
+                    }
+                }
 
                 // Preparar los datos del ítem para insertarlos luego
                 $orderItemsData[] = [
@@ -149,14 +164,42 @@ class OrderController extends Controller
             ], 404);
         }
 
-        $order->update([
-            'status' => $request->validated()['status']
-        ]);
+        $newStatus = $request->validated()['status'];
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Estado del pedido actualizado exitosamente.',
-            'data' => $order
-        ]);
+        try {
+            DB::beginTransaction();
+
+            if ($newStatus === 'cancelled' && $order->status !== 'cancelled') {
+                // Reponer stock
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    if ($product && $product->stock !== null) {
+                        $product->increment('stock', $item->quantity);
+                        if (!$product->is_available && $product->stock > 0) {
+                            $product->update(['is_available' => true]);
+                        }
+                    }
+                }
+            }
+
+            $order->update([
+                'status' => $newStatus
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado del pedido actualizado exitosamente.',
+                'data' => $order
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -11,10 +11,25 @@ class MarketplaceController extends Controller
      * Devuelve una lista paginada de todos los negocios.
      * Ideal para el feed "Descubre tu ciudad".
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Se puede filtrar por 'status' => 'active' si es necesario
-        $businesses = LocalBusiness::paginate(15);
+        $query = LocalBusiness::with(['products' => function ($q) {
+            $q->where('is_available', true);
+        }])->withCount(['products' => function ($q) {
+            $q->where('is_available', true);
+        }]);
+
+        // Filtro por categoría
+        if ($request->has('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // Búsqueda por nombre
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $businesses = $query->paginate(15);
 
         return response()->json([
             'success' => true,

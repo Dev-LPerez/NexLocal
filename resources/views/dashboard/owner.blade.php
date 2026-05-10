@@ -11,6 +11,12 @@
             <!-- Contenedor Principal -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-xl border dark:border-gray-700">
                 
+                @if($localBusiness)
+                    <div class="p-6 md:p-8 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                        @include('components.owner.stats-overview')
+                    </div>
+                @endif
+                
                 <!-- Navegación de Pestañas -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex overflow-x-auto overflow-y-hidden hide-scrollbar" aria-label="Tabs">
@@ -158,6 +164,8 @@
                     services: @json($localBusiness->services ?? []), // Inicializado con los servicios del backend
                     showProductModal: false,
                     productImagesCount: 0,
+                    isEditingProduct: false,
+                    currentProduct: {},
 
                     imagePreview(event, previewId) {
                         const file = event.target.files[0];
@@ -172,13 +180,43 @@
                         }
                     },
                     
-                    editProduct(id) {
-                        alert('Editar producto con ID: ' + id + ' (Simulación)');
+                    editProduct(product) {
+                        this.isEditingProduct = true;
+                        this.currentProduct = product;
+                        this.showProductModal = true;
+                    },
+
+                    openCreateProduct() {
+                        this.isEditingProduct = false;
+                        this.currentProduct = {};
+                        this.showProductModal = true;
                     },
 
                     deleteProduct(id) {
                         if(confirm('¿Estás seguro de eliminar este producto?')) {
-                            alert('Producto eliminado (Simulación)');
+                            let form = document.getElementById('delete-product-form');
+                            if(!form) {
+                                form = document.createElement('form');
+                                form.method = 'POST';
+                                form.style.display = 'none';
+                                
+                                let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                                let csrfInput = document.createElement('input');
+                                csrfInput.type = 'hidden';
+                                csrfInput.name = '_token';
+                                csrfInput.value = csrfToken;
+                                form.appendChild(csrfInput);
+                                
+                                let methodInput = document.createElement('input');
+                                methodInput.type = 'hidden';
+                                methodInput.name = '_method';
+                                methodInput.value = 'DELETE';
+                                form.appendChild(methodInput);
+                                
+                                document.body.appendChild(form);
+                            }
+                            form.action = `/dashboard/products/${id}`;
+                            form.submit();
                         }
                     }
                 }

@@ -63,6 +63,7 @@ class ExperienceController extends Controller
             }
 
             return [
+                'id' => $business->id,
                 'name' => $business->name ?? 'Emprendimiento Local',
                 'description' => $business->description ?? 'Conoce este increíble emprendimiento.',
                 'location' => $business->address ?? 'Montería',

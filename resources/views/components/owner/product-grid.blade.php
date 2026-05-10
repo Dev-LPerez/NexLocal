@@ -3,7 +3,7 @@
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Catálogo de Productos</h3>
         <p class="text-sm text-gray-500 dark:text-gray-400">Gestiona los platillos o artículos de tu negocio.</p>
     </div>
-    <x-primary-button @click="showProductModal = true" type="button" class="mt-4 sm:mt-0 bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 shadow-md">
+    <x-primary-button @click="openCreateProduct()" type="button" class="mt-4 sm:mt-0 bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 shadow-md">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Añadir Producto
     </x-primary-button>
@@ -12,7 +12,7 @@
 @if($products->isEmpty())
     <div class="text-center py-12">
         <p class="text-gray-500 dark:text-gray-400 mb-4">Aún no tienes productos registrados en tu menú.</p>
-        <button @click="showProductModal = true" class="text-purple-600 font-bold hover:underline">Empieza agregando tu primer producto</button>
+        <button @click="openCreateProduct()" class="text-purple-600 font-bold hover:underline">Empieza agregando tu primer producto</button>
     </div>
 @else
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -33,7 +33,7 @@
                     <h4 class="font-bold text-gray-900 dark:text-gray-100 text-lg mb-2 truncate">{{ $product->name }}</h4>
                     <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">{{ $product->description }}</p>
                     <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-4 mt-auto">
-                        <button @click="editProduct({{ $product->id }})" class="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold text-sm transition">
+                        <button @click="editProduct({{ json_encode($product) }})" class="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold text-sm transition">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             Editar
                         </button>

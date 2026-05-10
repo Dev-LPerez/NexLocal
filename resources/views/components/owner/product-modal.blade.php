@@ -2,24 +2,27 @@
     <div x-show="showProductModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showProductModal = false"></div>
     <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
     <div x-show="showProductModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-        <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+        <form :action="isEditingProduct ? `/dashboard/products/${currentProduct.id}` : '{{ route('products.store') }}'" method="POST" enctype="multipart/form-data">
             @csrf
+            <template x-if="isEditingProduct">
+                <input type="hidden" name="_method" value="PUT">
+            </template>
             <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="modal-title">Añadir Nuevo Producto</h3>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="modal-title" x-text="isEditingProduct ? 'Editar Producto' : 'Añadir Nuevo Producto'"></h3>
                         <div class="mt-4 space-y-4 text-left">
                             <div>
                                 <x-input-label for="prod_name" value="Nombre del Producto" />
-                                <x-text-input id="prod_name" name="name" type="text" class="mt-1 block w-full" required />
+                                <x-text-input id="prod_name" name="name" type="text" class="mt-1 block w-full" x-model="currentProduct.name" required />
                             </div>
                             <div>
                                 <x-input-label for="prod_desc" value="Descripción" />
-                                <textarea id="prod_desc" name="description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 rounded-md shadow-sm"></textarea>
+                                <textarea id="prod_desc" name="description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 rounded-md shadow-sm" x-model="currentProduct.description"></textarea>
                             </div>
                             <div>
                                 <x-input-label for="prod_price" value="Precio" />
-                                <x-text-input id="prod_price" name="price" type="number" class="mt-1 block w-full" required />
+                                <x-text-input id="prod_price" name="price" type="number" class="mt-1 block w-full" x-model="currentProduct.price" required />
                             </div>
                             
                             <!-- Image Upload para Producto -->

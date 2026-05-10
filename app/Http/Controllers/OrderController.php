@@ -149,19 +149,25 @@ class OrderController extends Controller
         $business = $user->localBusiness;
 
         if (!$business) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No tienes un emprendimiento registrado.'
-            ], 404);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes un emprendimiento registrado.'
+                ], 404);
+            }
+            return back()->with('error', 'No tienes un emprendimiento registrado.');
         }
 
         $order = $business->orders()->find($id);
 
         if (!$order) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Pedido no encontrado en tu emprendimiento.'
-            ], 404);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pedido no encontrado en tu emprendimiento.'
+                ], 404);
+            }
+            return back()->with('error', 'Pedido no encontrado en tu emprendimiento.');
         }
 
         $newStatus = $request->validated()['status'];
@@ -188,18 +194,108 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Estado del pedido actualizado exitosamente.',
-                'data' => $order
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Estado del pedido actualizado exitosamente.',
+                    'data' => $order
+                ]);
+            }
+            
+            return back()->with('success', 'Estado del pedido actualizado exitosamente a ' . ucfirst($newStatus));
+            
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar el estado: ' . $e->getMessage()
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al actualizar el estado: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return back()->with('error', 'Error al actualizar el estado: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * (Turista) Crear pedido desde la web.
+     */
+    public function checkoutWeb(Request $request, $businessId)
+    {
+        $request->validate([
+            'cart' => 'required|string'
+        ]);
+
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión para hacer un pedido.');
+        }
+
+        $cartItems = json_decode($request->cart, true);
+        if (!$cartItems || empty($cartItems)) {
+            return back()->with('error', 'El carrito está vacío.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $totalAmount = 0;
+            $orderItemsData = [];
+
+            foreach ($cartItems as $item) {
+                // Fetch product with lock
+                $product = Product::lockForUpdate()->findOrFail($item['id']);
+                
+                // Extra safety: make sure product belongs to the current business
+                if ($product->local_business_id != $businessId) {
+                    throw new \Exception('Producto no pertenece a este negocio.');
+                }
+
+                $quantity = $item['quantity'];
+                
+                // Calculate item total using trusted DB price
+                $unitPrice = $product->price;
+                $totalAmount += ($unitPrice * $quantity);
+
+                // Reduce stock if applicable
+                if ($product->stock !== null) {
+                    if (!$product->hasStock($quantity)) {
+                        throw new \Exception("Stock insuficiente para '{$product->name}'.");
+                    }
+                    $product->decrement('stock', $quantity);
+                    if ($product->fresh()->stock === 0) {
+                        $product->update(['is_available' => false]);
+                    }
+                }
+
+                $orderItemsData[] = [
+                    'product_id' => $product->id,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                ];
+            }
+
+            // Create Order
+            $order = Order::create([
+                'user_id' => $user->id,
+                'local_business_id' => $businessId,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+            ]);
+
+            // Create OrderItems
+            foreach ($orderItemsData as $itemData) {
+                $order->items()->create($itemData);
+            }
+
+            DB::commit();
+
+            return redirect()->route('dashboard')->with('success', 'Pedido realizado con éxito. Puedes ver el estado de tus pedidos aquí.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Hubo un problema al procesar tu pedido: ' . $e->getMessage());
         }
     }
 }

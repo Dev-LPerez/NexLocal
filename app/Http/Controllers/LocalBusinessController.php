@@ -160,4 +160,12 @@ class LocalBusinessController extends Controller
 
         return back()->with('success', 'Personalización de tienda guardada exitosamente.');
     }
+
+    public function show(LocalBusiness $business)
+    {
+        // Load products to display on the storefront
+        $business->load('products');
+
+        return view('businesses.show', compact('business'));
+    }
 }

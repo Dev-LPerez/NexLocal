@@ -19,6 +19,11 @@ Route::get('/experiences/{experience}', [ExperienceController::class, 'show'])
     ->where('experience', '[0-9]+')
     ->name('experiences.show');
 
+// --- Ruta Pública para Ver Detalle de Negocio (Storefront) ---
+Route::get('/businesses/{business}', [\App\Http\Controllers\LocalBusinessController::class, 'show'])
+    ->where('business', '[0-9]+')
+    ->name('businesses.show');
+
 // --- Ruta Dashboard (requiere auth y email verificado) ---
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -30,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dashboard/business/images/delete', [\App\Http\Controllers\LocalBusinessController::class, 'deleteGalleryImage'])->name('business.images.delete');
     Route::post('/dashboard/business/location', [\App\Http\Controllers\LocalBusinessController::class, 'updateLocation'])->name('business.location');
     Route::post('/dashboard/business/customize', [\App\Http\Controllers\LocalBusinessController::class, 'customize'])->name('business.customize');
+    Route::post('/dashboard/business/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.status');
     Route::resource('dashboard/products', \App\Http\Controllers\ProductController::class)->except(['index', 'show', 'edit', 'create']);
 });
 
@@ -65,6 +71,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout.show');
         Route::post('/checkout/process', [BookingController::class, 'processPayment'])->name('checkout.process');
         Route::get('/checkout/success/{booking}', [BookingController::class, 'checkoutSuccess'])->name('checkout.success');
+        
+        // Rutas de checkout para productos locales (Storefront)
+        Route::post('/businesses/{businessId}/checkout', [\App\Http\Controllers\OrderController::class, 'checkoutWeb'])->name('checkout.store');
 
         // Rutas de reseñas
         Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');

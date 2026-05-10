@@ -42,6 +42,11 @@
                             <x-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.index')" class="text-base font-medium">
                                 Mis Reservas
                             </x-nav-link>
+                            
+                        @elseif(Auth::user()->role === 'owner')
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-base font-medium text-purple-600 dark:text-purple-400">
+                                Gestión de Emprendimiento
+                            </x-nav-link>
                         @endif
                     @endauth
                 </div>
@@ -163,7 +168,7 @@
                                 @endif
                                 <div class="hidden md:block text-left mr-1">
                                     <p class="text-xs font-bold leading-none">{{ Auth::user()->name }}</p>
-                                    <p class="text-[10px] text-gray-500 leading-none mt-0.5 uppercase">{{ Auth::user()->role === 'guide' ? 'Guía' : 'Turista' }}</p>
+                                    <p class="text-[10px] text-gray-500 leading-none mt-0.5 uppercase">{{ Auth::user()->role === 'guide' ? 'Guía' : (Auth::user()->role === 'owner' ? 'Dueño' : 'Turista') }}</p>
                                 </div>
                                 <svg class="fill-current h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                             </button>
@@ -211,6 +216,8 @@
                     <x-responsive-nav-link :href="route('experiences.create')" :active="request()->routeIs('experiences.create')">Crear Experiencia</x-responsive-nav-link>
                 @elseif(Auth::user()->role === 'tourist')
                     <x-responsive-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.index')">Mis Reservas</x-responsive-nav-link>
+                @elseif(Auth::user()->role === 'owner')
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-purple-600 dark:text-purple-400">Gestión de Emprendimiento</x-responsive-nav-link>
                 @endif
             @endauth
             @guest

@@ -24,6 +24,15 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::middleware(['auth'])->group(function () {
+    Route::post('/dashboard/business', [\App\Http\Controllers\LocalBusinessController::class, 'storeOrUpdate'])->name('business.store');
+    Route::post('/dashboard/business/images', [\App\Http\Controllers\LocalBusinessController::class, 'updateImages'])->name('business.images');
+    Route::post('/dashboard/business/images/delete', [\App\Http\Controllers\LocalBusinessController::class, 'deleteGalleryImage'])->name('business.images.delete');
+    Route::post('/dashboard/business/location', [\App\Http\Controllers\LocalBusinessController::class, 'updateLocation'])->name('business.location');
+    Route::post('/dashboard/business/customize', [\App\Http\Controllers\LocalBusinessController::class, 'customize'])->name('business.customize');
+    Route::resource('dashboard/products', \App\Http\Controllers\ProductController::class)->except(['index', 'show', 'edit', 'create']);
+});
+
 
 // --- Grupo de Rutas Protegidas por Autenticación ---
     // Ruta para cuenta suspendida (debe estar antes del middleware check.suspended)

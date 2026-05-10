@@ -16,13 +16,18 @@ class Product extends Model
         'price',
         'image_path',
         'is_available',
-        'stock'
+        'stock',
+        'product_category',
+        'is_featured',
+        'sort_order'
     ];
 
     protected $casts = [
         'is_available' => 'boolean',
         'price' => 'decimal:2',
         'stock' => 'integer',
+        'is_featured' => 'boolean',
+        'sort_order' => 'integer',
     ];
 
     // Accessor para que el frontend pueda consultar fácilmente

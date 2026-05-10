@@ -63,6 +63,14 @@ class DashboardController extends Controller
             return redirect()->route('home');
         }
 
+        // --- Panel del Dueño ---
+        if ($user->role === 'owner') {
+            $localBusiness = $user->localBusiness;
+            $products = $localBusiness ? $localBusiness->products : collect();
+            $orders = $localBusiness ? $localBusiness->orders()->with(['user', 'items.product'])->latest()->get() : collect();
+            return view('dashboard.owner', compact('localBusiness', 'products', 'orders'));
+        }
+
         if ($user->role === 'admin') {
             return redirect()->route('home');
         }

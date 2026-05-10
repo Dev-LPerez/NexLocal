@@ -46,21 +46,36 @@ class ExperienceController extends Controller
 
         $experiences = $query->paginate(50)->withQueryString();
 
-        // Datos de restaurantes (simulados) - Esto se mantiene igual
-        $restaurants = [
-            [
-                'name' => 'El Pescador del Sinú',
-                'location' => 'Montería',
-                'rating' => 4.8,
-                'reviews' => 284,
-                'category' => 'Comida de Mar',
-                'price_range' => '$$',
-                'hours' => '11:00 AM - 10:00 PM',
-                'specialties' => ['Bocachico Frito', 'Viuda de Pescado', 'Mote de Queso'],
-                'image' => 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=800'
-            ],
-            // ... otros
-        ];
+        // Obtener emprendimientos reales desde la base de datos
+        $localBusinesses = \App\Models\LocalBusiness::with('products')->get();
+        
+        $restaurants = $localBusinesses->map(function ($business) {
+            // Extraer especialidades a partir de los productos
+            $specialties = $business->products->take(3)->pluck('name')->toArray();
+            if (empty($specialties)) {
+                $specialties = ['Recomendado'];
+            }
+            
+            // Determinar rango de precio si existe
+            $priceRange = '$$';
+            if (isset($business->price_range)) {
+                $priceRange = str_repeat('$', $business->price_range);
+            }
+
+            return [
+                'name' => $business->name ?? 'Emprendimiento Local',
+                'description' => $business->description ?? 'Conoce este increíble emprendimiento.',
+                'location' => $business->address ?? 'Montería',
+                'rating' => 5.0,
+                'category' => $business->category ?? 'General',
+                'price_range' => $priceRange,
+                'hours' => 'Consulte disponibilidad',
+                'specialties' => $specialties,
+                'image' => $business->cover_image_path 
+                           ? asset('storage/' . $business->cover_image_path) 
+                           : 'https://placehold.co/400x300/e2e8f0/64748b?text=' . urlencode($business->name ?? 'Local')
+            ];
+        })->toArray();
 
         // Pasamos también la variable $category a la vista
         return view('welcome', compact('experiences', 'restaurants', 'searchTerm', 'category'));

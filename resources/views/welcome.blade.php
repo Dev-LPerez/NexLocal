@@ -320,54 +320,6 @@
                                     <x-restaurant-card :restaurant="$restaurant"/>
                                 </div>
                             @endforeach
-                            <div x-show="catFilter === 'todos' || catFilter === 'Típico'"
-                                 x-transition:enter="transition ease-out duration-300"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100">
-                                <x-restaurant-card :restaurant="[
-                                    'name' => 'La Cazuela Sinuana',
-                                    'description' => 'Especialidad en cazuelas de mariscos y cocina típica cordobesa.',
-                                    'image' => 'images/Cazuela Sinuana.png',
-                                    'location' => 'Montería',
-                                    'rating' => 4.8,
-                                    'category' => 'Típico',
-                                    'price_range' => '$$ - $$$',
-                                    'hours' => '12:00 - 23:00',
-                                    'specialties' => ['Cazuela de mariscos', 'Arroz con coco', 'Pescado frito']
-                                ]"/>
-                            </div>
-                            <div x-show="catFilter === 'todos' || catFilter === 'Lácteos'"
-                                 x-transition:enter="transition ease-out duration-300"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100">
-                                <x-restaurant-card :restaurant="[
-                                    'name' => 'El Rincón del Queso',
-                                    'description' => 'Quesos artesanales y platos tradicionales de la región.',
-                                    'image' => 'images/Rincon del queso.png',
-                                    'location' => 'Montería',
-                                    'rating' => 4.7,
-                                    'category' => 'Lácteos',
-                                    'price_range' => '$ - $$',
-                                    'hours' => '08:00 - 20:00',
-                                    'specialties' => ['Queso costeño', 'Arepas de queso', 'Postres']
-                                ]"/>
-                            </div>
-                            <div x-show="catFilter === 'todos' || catFilter === 'Pescados'"
-                                 x-transition:enter="transition ease-out duration-300"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100">
-                                <x-restaurant-card :restaurant="[
-                                    'name' => 'Sabores del Río',
-                                    'description' => 'Pescados frescos y ambiente familiar junto al río Sinú.',
-                                    'image' => 'images/Sabores del rio.png',
-                                    'location' => 'Montería',
-                                    'rating' => 4.9,
-                                    'category' => 'Pescados',
-                                    'price_range' => '$$ - $$$',
-                                    'hours' => '11:00 - 22:00',
-                                    'specialties' => ['Mojarra frita', 'Sancocho de pescado', 'Patacones']
-                                ]"/>
-                            </div>
                         </div>
                     </div>
 

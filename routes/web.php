@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dashboard/business/customize', [\App\Http\Controllers\LocalBusinessController::class, 'customize'])->name('business.customize');
     Route::post('/dashboard/business/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.status');
     Route::resource('dashboard/products', \App\Http\Controllers\ProductController::class)->except(['index', 'show', 'edit', 'create']);
+    Route::patch('dashboard/products/{product}/toggle', [\App\Http\Controllers\ProductController::class, 'toggleAvailability'])->name('products.toggle');
 });
 
 
@@ -71,13 +72,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/checkout', [BookingController::class, 'showCheckout'])->name('checkout.show');
         Route::post('/checkout/process', [BookingController::class, 'processPayment'])->name('checkout.process');
         Route::get('/checkout/success/{booking}', [BookingController::class, 'checkoutSuccess'])->name('checkout.success');
-        
+
         // Rutas de checkout para productos locales (Storefront)
         Route::post('/businesses/{businessId}/checkout', [\App\Http\Controllers\OrderController::class, 'checkoutWeb'])->name('checkout.store');
 
         // Rutas de reseñas
         Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
         Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+        // Rutas de reseñas de negocios
+        Route::post('/businesses/{business}/reviews', [\App\Http\Controllers\BusinessReviewController::class, 'store'])->name('business-reviews.store');
     });
 
     // --- RUTAS PARA NOTIFICACIONES ---
@@ -91,8 +95,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/conversations', [ChatController::class, 'getConversations'])->name('chat.conversations');
     Route::get('/chat/{bookingId}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
     Route::post('/chat/{bookingId}/send', [ChatController::class, 'sendMessage'])->name('chat.send');
-    Route::get('/chat/unread-count', [ChatController::class, 'getUnreadCount'])->name('chat.unreadCount');
     Route::delete('/chat/{bookingId}/conversation', [ChatController::class, 'deleteConversation'])->name('chat.deleteConversation');
+
+    Route::get('/chat/orders/{orderId}/messages', [ChatController::class, 'getOrderMessages'])->name('chat.order_messages');
+    Route::post('/chat/orders/{orderId}/send', [ChatController::class, 'sendOrderMessage'])->name('chat.order_send');
+    Route::delete('/chat/orders/{orderId}/conversation', [ChatController::class, 'deleteOrderConversation'])->name('chat.order_delete');
+
+    Route::get('/chat/unread-count', [ChatController::class, 'getUnreadCount'])->name('chat.unreadCount');
 });
 
 // --- GRUPO DE RUTAS DE ADMINISTRADOR ---
@@ -122,6 +131,10 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])
         Route::get('/experiences', [\App\Http\Controllers\AdminController::class, 'experiences'])->name('experiences');
         Route::post('/experiences/{id}/status', [\App\Http\Controllers\AdminController::class, 'changeExperienceStatus'])->name('experiences.status');
         Route::post('/experiences/{id}/toggle-featured', [\App\Http\Controllers\AdminController::class, 'toggleFeatured'])->name('experiences.toggleFeatured');
+
+        // Moderación de Negocios
+        Route::get('/businesses', [\App\Http\Controllers\AdminController::class, 'businesses'])->name('businesses');
+        Route::post('/businesses/{id}/status', [\App\Http\Controllers\AdminController::class, 'changeBusinessStatus'])->name('businesses.status');
 
         // Moderación de Reseñas
         Route::get('/reviews', [\App\Http\Controllers\AdminController::class, 'reviews'])->name('reviews');

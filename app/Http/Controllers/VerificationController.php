@@ -16,9 +16,9 @@ class VerificationController extends Controller
     {
         $user = Auth::user();
 
-        // Redirigir si no es guía
-        if ($user->role !== 'guide') {
-            return redirect()->route('home')->with('error', 'Solo los guías necesitan verificar su identidad.');
+        // Redirigir si no es guía ni dueño de negocio
+        if (!in_array($user->role, ['guide', 'owner'])) {
+            return redirect()->route('home')->with('error', 'Solo los guías y emprendedores necesitan verificar su identidad.');
         }
 
         return view('auth.verify-identity');
@@ -72,7 +72,7 @@ class VerificationController extends Controller
             NotificationHelper::create(
                 $admin->id,
                 '📋 Nueva Solicitud de Verificación',
-                "El guía {$user->name} ha enviado sus documentos de identidad para verificación.",
+                "El usuario {$user->name} ({$user->role}) ha enviado sus documentos de identidad para verificación.",
                 'admin_verification',
                 route('admin.verification')
             );

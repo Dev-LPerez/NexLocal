@@ -33,9 +33,13 @@ class Order extends Model
         return $this->belongsTo(LocalBusiness::class);
     }
 
-    // Relación: Un pedido tiene muchos "ítems" o productos
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function chatMessages()
+    {
+        return $this->hasMany(ChatMessage::class);
     }
 }

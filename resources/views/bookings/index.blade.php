@@ -198,7 +198,9 @@
             function openChatFromBooking(bookingId, userName, experienceTitle, bookingStatus) {
                 // Crear objeto de conversación
                 const conversation = {
-                    booking_id: bookingId,
+                    id: bookingId,
+                    type: 'booking',
+                    booking_id: 'booking_' + bookingId, // backward compatibility
                     other_user: {
                         name: userName
                     },

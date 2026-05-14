@@ -9,6 +9,7 @@ class ChatMessage extends Model
 {
     protected $fillable = [
         'booking_id',
+        'order_id',
         'sender_id',
         'receiver_id',
         'message',
@@ -31,6 +32,14 @@ class ChatMessage extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    /**
+     * Relación con la orden/pedido (nuevo e-commerce)
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     /**

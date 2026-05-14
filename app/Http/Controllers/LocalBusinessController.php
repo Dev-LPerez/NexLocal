@@ -115,7 +115,7 @@ class LocalBusinessController extends Controller
         }
 
         $gallery = $business->gallery_images;
-        
+
         if (($key = array_search($request->image, $gallery)) !== false) {
             unset($gallery[$key]);
             Storage::disk('public')->delete($request->image);
@@ -155,7 +155,7 @@ class LocalBusinessController extends Controller
 
         // Clean up checkboxes array for operating_hours to ensure unchecked days are still processed if needed
         // but simple assignment works because un-submitted days will just be absent in the input
-        
+
         $business->update($data);
 
         return back()->with('success', 'Personalización de tienda guardada exitosamente.');
@@ -164,7 +164,7 @@ class LocalBusinessController extends Controller
     public function show(LocalBusiness $business)
     {
         // Load products to display on the storefront
-        $business->load('products');
+        $business->load(['products', 'reviews.user']);
 
         return view('businesses.show', compact('business'));
     }

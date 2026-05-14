@@ -60,4 +60,9 @@ class LocalBusiness extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(BusinessReview::class);
+    }
 }

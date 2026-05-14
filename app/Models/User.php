@@ -126,6 +126,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if the owner is verified and can operate.
+     */
+    public function isVerifiedOwner(): bool
+    {
+        return $this->role === 'owner' &&
+            $this->verification_status === 'approved' &&
+            $this->identity_verified_at !== null;
+    }
+
+    /**
      * Check if the guide has pending verification.
      */
     public function hasPendingVerification(): bool

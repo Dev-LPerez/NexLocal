@@ -82,9 +82,9 @@
                         </span>
 
                         {{-- Enlace a la reserva (solo si es guía o turista involucrado) --}}
-                        <a :href="userRole === 'guide' ? '/dashboard' : '/bookings'"
+                        <a :href="window.type === 'order' ? (userRole === 'owner' ? '/dashboard' : '/orders') : (userRole === 'guide' ? '/dashboard' : '/bookings')"
                            class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5">
-                            Ver reserva
+                            <span x-text="window.type === 'order' ? 'Ver pedido' : 'Ver reserva'"></span>
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                             </svg>
@@ -159,11 +159,14 @@
                     return;
                 }
                 try {
-                    const response = await fetch(`/chat/${conversation.booking_id}/messages`, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
+                    let url = conversation.type === 'order' ? `/chat/orders/${conversation.id}/messages` : `/chat/${conversation.id}/messages`;
+                    const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
                     const data = await response.json();
 
                     const newWindow = {
-                        booking_id: conversation.booking_id,
+                        booking_id: conversation.booking_id, // kept for backward compatibility
+                        id: conversation.id,
+                        type: conversation.type,
                         other_user: data.other_user,
                         experience_title: conversation.experience_title,
                         booking_status: conversation.booking_status,
@@ -200,7 +203,8 @@
                 const window = this.openWindows.find(w => w.booking_id === bookingId);
                 if (!window || !window.newMessage.trim()) return;
                 try {
-                    const response = await fetch(`/chat/${bookingId}/send`, {
+                    let url = window.type === 'order' ? `/chat/orders/${window.id}/send` : `/chat/${window.id}/send`;
+                    const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' },
                         body: JSON.stringify({ message: window.newMessage })
@@ -216,9 +220,11 @@
 
             async loadMessages(bookingId) {
                 try {
-                    const response = await fetch(`/chat/${bookingId}/messages`, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
-                    const data = await response.json();
                     const window = this.openWindows.find(w => w.booking_id === bookingId);
+                    if (!window) return;
+                    let url = window.type === 'order' ? `/chat/orders/${window.id}/messages` : `/chat/${window.id}/messages`;
+                    const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
+                    const data = await response.json();
                     if (window) {
                         const oldLength = window.messages.length;
                         window.messages = data.messages;

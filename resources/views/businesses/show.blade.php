@@ -80,14 +80,14 @@
                 <div class="w-32 h-32 md:w-40 md:h-40 flex-shrink-0 rounded-2xl overflow-hidden shadow-lg border-4 border-white dark:border-gray-800 bg-white">
                     <img src="{{ $avatar }}" alt="{{ $business->name }}" class="w-full h-full object-cover">
                 </div>
-                
+
                 <div class="flex-1 text-center md:text-left mt-2 md:mt-0">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">{{ $business->name }}</h1>
                             <p class="text-lg text-gray-500 dark:text-gray-400 mt-1 font-medium">{{ ucfirst($business->business_type) }} • {{ $business->category }}</p>
                         </div>
-                        
+
                         <div class="flex gap-3 justify-center md:justify-end">
                             @if(!empty($business->social_links['instagram']))
                                 <a href="{{ $business->social_links['instagram'] }}" target="_blank" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:store-bg-primary hover:text-white transition-colors shadow-sm">
@@ -101,13 +101,13 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     @if($business->welcome_message)
                         <div class="mt-4 py-3 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl inline-block">
                             <p class="text-gray-800 dark:text-gray-200 font-medium italic">"{{ $business->welcome_message }}"</p>
                         </div>
                     @endif
-                    
+
                     <p class="text-gray-600 dark:text-gray-400 mt-4 max-w-3xl leading-relaxed">{{ $business->description }}</p>
 
                     <div class="flex flex-wrap items-center gap-4 mt-6">
@@ -124,10 +124,10 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Contenido Principal -->
             <div class="mt-8 flex flex-col lg:flex-row gap-8">
-                
+
                 <!-- Columna Izquierda (Filtros e Info) -->
                 <div class="w-full lg:w-1/4 space-y-6">
                     @if(!empty($business->services))
@@ -156,13 +156,35 @@
                             </div>
                         </div>
                     @endif
+
+                    @if(!empty($business->operating_hours) && count($business->operating_hours) > 0)
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                            <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-4">Horario de Atención</h3>
+                            <div class="space-y-3">
+                                @foreach(['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'] as $day)
+                                    @if(isset($business->operating_hours[$day]))
+                                        <div class="flex justify-between items-center text-sm border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0 last:pb-0">
+                                            <span class="text-gray-600 dark:text-gray-400 capitalize">{{ $day }}</span>
+                                            @if(isset($business->operating_hours[$day]['is_open']) && $business->operating_hours[$day]['is_open'])
+                                                <span class="text-gray-900 dark:text-gray-200 font-medium">
+                                                    {{ $business->operating_hours[$day]['open'] ?? '08:00' }} - {{ $business->operating_hours[$day]['close'] ?? '18:00' }}
+                                                </span>
+                                            @else
+                                                <span class="text-red-500 dark:text-red-400 font-medium text-xs uppercase px-2 py-1 bg-red-50 dark:bg-red-900/10 rounded-md">Cerrado</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Columna Derecha (Productos) -->
                 <div class="w-full lg:w-3/4">
                     <div class="flex justify-between items-end mb-6">
                         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Nuestro Catálogo</h2>
-                        
+
                         <!-- Floating Cart Button -->
                         <button @click="isCartOpen = true" class="fixed sm:relative bottom-6 right-6 sm:bottom-auto sm:right-auto z-40 bg-white dark:bg-gray-800 store-text-primary border-2 store-border-primary shadow-xl sm:shadow-sm rounded-full sm:rounded-xl px-4 py-3 flex items-center font-bold hover:bg-gray-50 transition-transform hover:scale-105">
                             <svg class="w-6 h-6 sm:w-5 sm:h-5 mr-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -183,29 +205,111 @@
                                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col hover:shadow-md transition-shadow group relative">
                                     <div class="h-48 relative overflow-hidden bg-gray-100 dark:bg-gray-900">
                                         @if($product->image_path)
-                                            <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                            <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 {{ !$product->is_available ? 'grayscale opacity-70' : '' }}">
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                            <div class="w-full h-full flex items-center justify-center text-gray-400 {{ !$product->is_available ? 'grayscale opacity-70' : '' }}">
                                                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L28 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            </div>
+                                        @endif
+                                        @if(!$product->is_available)
+                                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
+                                                <span class="text-white font-bold px-4 py-2 bg-red-600 rounded-lg transform -rotate-12 shadow-lg border-2 border-white">AGOTADO</span>
                                             </div>
                                         @endif
                                     </div>
                                     <div class="p-5 flex-1 flex flex-col">
-                                        <h4 class="font-bold text-gray-900 dark:text-white text-lg mb-1">{{ $product->name }}</h4>
+                                        <h4 class="font-bold text-gray-900 dark:text-white text-lg mb-1 {{ !$product->is_available ? 'text-gray-400 dark:text-gray-500' : '' }}">{{ $product->name }}</h4>
                                         <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">{{ $product->description }}</p>
                                         <div class="flex items-center justify-between mt-auto">
-                                            <span class="text-xl font-black text-gray-900 dark:text-white">$ {{ number_format($product->price, 0, ',', '.') }}</span>
-                                            
-                                            <button @click="$store.cart.add({ id: {{ $product->id }}, name: '{{ addslashes($product->name) }}', price: {{ $product->price }}, image: '{{ $product->image_path ? asset('storage/' . $product->image_path) : '' }}' })" 
-                                                    class="w-10 h-10 rounded-full store-bg-primary text-white flex items-center justify-center hover:opacity-90 transition shadow-sm" title="Añadir al carrito">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                            </button>
+                                            <span class="text-xl font-black text-gray-900 dark:text-white {{ !$product->is_available ? 'text-gray-400 dark:text-gray-600' : '' }}">$ {{ number_format($product->price, 0, ',', '.') }}</span>
+
+                                            @if($product->is_available)
+                                                <button @click="$store.cart.add({ id: {{ $product->id }}, name: '{{ addslashes($product->name) }}', price: {{ $product->price }}, image: '{{ $product->image_path ? asset('storage/' . $product->image_path) : '' }}' })"
+                                                        class="w-10 h-10 rounded-full store-bg-primary text-white flex items-center justify-center hover:opacity-90 transition shadow-sm" title="Añadir al carrito">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                </button>
+                                            @else
+                                                <button disabled class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 text-gray-500 flex items-center justify-center cursor-not-allowed shadow-sm" title="No disponible">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                                </button>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @endif
+
+                    <!-- Seccion de Reseñas -->
+                    <div class="mt-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 sm:p-8">
+                        <div class="flex items-center justify-between mb-8">
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Reseñas de Clientes</h2>
+                            <div class="flex items-center bg-gray-50 dark:bg-gray-700/50 px-4 py-2 rounded-full">
+                                <span class="text-xl font-bold text-gray-900 dark:text-white mr-2">{{ $business->reviews->count() > 0 ? number_format($business->reviews->avg('rating'), 1) : 'Nuevo' }}</span>
+                                <div class="flex text-yellow-400">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                </div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">({{ $business->reviews->count() }} valoraciones)</span>
+                            </div>
+                        </div>
+
+                        @if(Auth::check() && Auth::user()->role === 'tourist' && Auth::user()->orders()->where('local_business_id', $business->id)->where('status', 'delivered')->exists())
+                            <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-8 border border-gray-100 dark:border-gray-700">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Escribe tu reseña</h3>
+                                <form action="{{ route('business-reviews.store', $business->id) }}" method="POST">
+                                    @csrf
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Calificación</label>
+                                        <div class="flex items-center space-x-2 rating-stars" x-data="{ rating: {{ old('rating', 5) }}, hoverRating: 0 }">
+                                            <input type="hidden" name="rating" x-model="rating">
+                                            <template x-for="i in 5">
+                                                <button type="button" @click="rating = i" @mouseenter="hoverRating = i" @mouseleave="hoverRating = 0" class="focus:outline-none">
+                                                    <svg class="w-8 h-8 transition-colors duration-150" :class="{'text-yellow-400': (hoverRating ? hoverRating >= i : rating >= i), 'text-gray-300 dark:text-gray-600': !(hoverRating ? hoverRating >= i : rating >= i)}" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="comment" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comentario</label>
+                                        <textarea id="comment" name="comment" rows="3" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="¿Cómo fue tu experiencia con los productos de {{ $business->name }}?"></textarea>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors">Publicar Reseña</button>
+                                    </div>
+                                </form>
+                            </div>
+                        @endif
+
+                        <div class="space-y-6">
+                            @forelse($business->reviews as $review)
+                                <div class="border-b border-gray-100 dark:border-gray-700 pb-6 last:border-0 last:pb-0">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center">
+                                            <img src="{{ $review->user->profile_photo_path ? asset('storage/' . $review->user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($review->user->name) }}" alt="{{ $review->user->name }}" class="w-10 h-10 rounded-full mr-3 border border-gray-200 dark:border-gray-600">
+                                            <div>
+                                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">{{ $review->user->name }}</h4>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $review->created_at->diffForHumans() }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex text-yellow-400">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                    @if($review->comment)
+                                        <p class="text-gray-600 dark:text-gray-300 ml-13">{{ $review->comment }}</p>
+                                    @endif
+                                </div>
+                            @empty
+                                <div class="text-center py-8">
+                                    <p class="text-gray-500 dark:text-gray-400">Todavía no hay reseñas para este negocio.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -269,7 +373,7 @@
                                     <p>Total</p>
                                     <p x-text="'$ ' + new Intl.NumberFormat('es-CO').format($store.cart.total)"></p>
                                 </div>
-                                
+
                                 <!-- Checkout Button -->
                                 <template x-if="$store.cart.items.length > 0">
                                     <form action="{{ route('checkout.store', $business->id) }}" method="POST">

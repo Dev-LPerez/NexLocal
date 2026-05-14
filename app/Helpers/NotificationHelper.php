@@ -134,6 +134,69 @@ class NotificationHelper
     }
 
     /**
+     * Notificación de Nuevo Pedido para el Negocio
+     */
+    public static function newOrderForBusiness(User $owner, $order)
+    {
+        return Notification::create([
+            'user_id' => $owner->id,
+            'type' => 'new_order',
+            'title' => 'Nuevo Pedido',
+            'message' => "Tienes un nuevo pedido de {$order->user->name} por $" . number_format($order->total_amount, 2) . ".",
+            'icon' => '🛍️',
+            'link' => route('dashboard'),
+        ]);
+    }
+
+    /**
+     * Notificación de Actualización de Estado de Pedido para el Cliente
+     */
+    public static function orderStatusUpdated(User $user, $order)
+    {
+        $statusText = match ($order->status) {
+            'preparing' => 'en preparación',
+            'ready' => 'listo para retiro/entrega',
+            'delivered' => 'entregado',
+            'cancelled' => 'cancelado',
+            default => 'actualizado'
+        };
+
+        $icon = match ($order->status) {
+            'preparing' => '👨‍🍳',
+            'ready' => '🛵',
+            'delivered' => '✅',
+            'cancelled' => '❌',
+            default => '🔄'
+        };
+
+        return Notification::create([
+            'user_id' => $user->id,
+            'type' => 'order_status_updated',
+            'title' => 'Actualización de Pedido',
+            'message' => "Tu pedido está {$statusText}.",
+            'icon' => $icon,
+            'link' => route('orders.index'),
+        ]);
+    }
+
+    /**
+     * Notificación de Nueva Reseña para Negocios
+     */
+    public static function newBusinessReview(User $owner, $review)
+    {
+        $rating = str_repeat('⭐', $review->rating);
+
+        return Notification::create([
+            'user_id' => $owner->id,
+            'type' => 'new_business_review',
+            'title' => 'Nueva Reseña',
+            'message' => "{$review->user->name} dejó una reseña {$rating} en tu negocio '{$review->localBusiness->name}'.",
+            'icon' => '⭐',
+            'link' => route('businesses.show', $review->local_business_id),
+        ]);
+    }
+
+    /**
      * Crear una notificación genérica (método alternativo más simple)
      *
      * @param int $userId ID del usuario que recibirá la notificación

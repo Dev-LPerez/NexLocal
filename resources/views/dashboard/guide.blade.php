@@ -504,7 +504,9 @@
         <script>
             function openChatFromBooking(bookingId, userName, experienceTitle, bookingStatus) {
                 const conversation = {
-                    booking_id: bookingId,
+                    id: bookingId,
+                    type: 'booking',
+                    booking_id: 'booking_' + bookingId,
                     other_user: {
                         name: userName
                     },

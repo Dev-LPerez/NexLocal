@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateOrderStatusRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\NotificationHelper;
 
 class OrderController extends Controller
 {
@@ -31,7 +32,7 @@ class OrderController extends Controller
             foreach ($items as $itemData) {
                 // Usar lockForUpdate para evitar race conditions
                 $product = Product::lockForUpdate()->findOrFail($itemData['product_id']);
-                
+
                 $quantity = $itemData['quantity'];
 
                 // Verificar stock
@@ -82,7 +83,12 @@ class OrderController extends Controller
             DB::commit();
 
             // Retornar el pedido con sus ítems para confirmación
-            $order->load('items.product', 'localBusiness');
+            $order->load('items.product', 'localBusiness.user');
+
+            // Notificar al dueño del negocio
+            if ($order->localBusiness && $order->localBusiness->user) {
+                NotificationHelper::newOrderForBusiness($order->localBusiness->user, $order);
+            }
 
             return response()->json([
                 'success' => true,
@@ -194,6 +200,9 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // Notificar al cliente sobre el cambio de estado
+            NotificationHelper::orderStatusUpdated($order->user, $order);
+
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -201,9 +210,9 @@ class OrderController extends Controller
                     'data' => $order
                 ]);
             }
-            
+
             return back()->with('success', 'Estado del pedido actualizado exitosamente a ' . ucfirst($newStatus));
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -213,7 +222,7 @@ class OrderController extends Controller
                     'message' => 'Error al actualizar el estado: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return back()->with('error', 'Error al actualizar el estado: ' . $e->getMessage());
         }
     }
@@ -246,14 +255,14 @@ class OrderController extends Controller
             foreach ($cartItems as $item) {
                 // Fetch product with lock
                 $product = Product::lockForUpdate()->findOrFail($item['id']);
-                
+
                 // Extra safety: make sure product belongs to the current business
                 if ($product->local_business_id != $businessId) {
                     throw new \Exception('Producto no pertenece a este negocio.');
                 }
 
                 $quantity = $item['quantity'];
-                
+
                 // Calculate item total using trusted DB price
                 $unitPrice = $product->price;
                 $totalAmount += ($unitPrice * $quantity);
@@ -290,6 +299,11 @@ class OrderController extends Controller
             }
 
             DB::commit();
+
+            $order->load('localBusiness.user');
+            if ($order->localBusiness && $order->localBusiness->user) {
+                NotificationHelper::newOrderForBusiness($order->localBusiness->user, $order);
+            }
 
             return redirect()->route('dashboard')->with('success', 'Pedido realizado con éxito. Puedes ver el estado de tus pedidos aquí.');
 

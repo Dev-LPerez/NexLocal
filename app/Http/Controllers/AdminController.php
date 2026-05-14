@@ -39,8 +39,8 @@ class AdminController extends Controller
      */
     public function verificationQueue()
     {
-        // Obtenemos los guías pendientes de verificación
-        $pendingGuides = User::where('role', 'guide')
+        // Obtenemos los guías y dueños pendientes de verificación
+        $pendingGuides = User::whereIn('role', ['guide', 'owner'])
             ->where('verification_status', 'pending')
             ->orderBy('updated_at', 'asc')
             ->get();
@@ -55,8 +55,8 @@ class AdminController extends Controller
     {
         $guide = User::findOrFail($id);
 
-        // Verificar que sea un guía pendiente
-        if ($guide->role !== 'guide' || $guide->verification_status !== 'pending') {
+        // Verificar que sea un usuario pendiente
+        if (!in_array($guide->role, ['guide', 'owner']) || $guide->verification_status !== 'pending') {
             return redirect()->back()->with('error', 'Esta solicitud no está disponible para aprobación.');
         }
 
@@ -66,16 +66,16 @@ class AdminController extends Controller
         $guide->rejection_reason = null;
         $guide->save();
 
-        // Notificar al guía
+        // Notificar al usuario
         NotificationHelper::create(
             $guide->id,
             '✅ ¡Verificación Aprobada!',
-            'Tu identidad ha sido verificada exitosamente. Ya puedes crear experiencias turísticas.',
+            'Tu identidad ha sido verificada exitosamente. Ya puedes operar en la plataforma.',
             'verification_approved',
-            route('experiences.create')
+            route($guide->role === 'guide' ? 'experiences.create' : 'dashboard')
         );
 
-        return redirect()->back()->with('success', '¡Guía verificado! ' . $guide->name . ' puede ahora crear experiencias.');
+        return redirect()->back()->with('success', '¡Usuario verificado! ' . $guide->name . ' puede operar normalmente.');
     }
 
     /**
@@ -91,8 +91,8 @@ class AdminController extends Controller
 
         $guide = User::findOrFail($id);
 
-        // Verificar que sea un guía pendiente
-        if ($guide->role !== 'guide' || $guide->verification_status !== 'pending') {
+        // Verificar que sea un usuario pendiente
+        if (!in_array($guide->role, ['guide', 'owner']) || $guide->verification_status !== 'pending') {
             return redirect()->back()->with('error', 'Esta solicitud no está disponible para rechazo.');
         }
 
@@ -102,7 +102,7 @@ class AdminController extends Controller
         $guide->identity_verified_at = null;
         $guide->save();
 
-        // Notificar al guía
+        // Notificar al usuario
         NotificationHelper::create(
             $guide->id,
             '❌ Verificación Rechazada',
@@ -111,7 +111,7 @@ class AdminController extends Controller
             route('verification.create')
         );
 
-        return redirect()->back()->with('success', 'Solicitud rechazada. El guía ha sido notificado.');
+        return redirect()->back()->with('success', 'Solicitud rechazada. El usuario ha sido notificado.');
     }
 
     /**
@@ -307,6 +307,33 @@ class AdminController extends Controller
 
         $status = $experience->is_featured ? 'destacada' : 'no destacada';
         return back()->with('success', "Experiencia marcada como {$status}.");
+    }
+
+    // ==================== MODERACIÓN DE NEGOCIOS ====================
+
+    public function businesses(Request $request)
+    {
+        $query = \App\Models\LocalBusiness::query()->with('owner');
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', "%{$request->search}%");
+        }
+
+        $businesses = $query->latest()->paginate(20);
+        return view('admin.businesses.index', compact('businesses'));
+    }
+
+    public function changeBusinessStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:open,closed'
+        ]);
+
+        $business = \App\Models\LocalBusiness::findOrFail($id);
+        $business->status = $request->status;
+        $business->save();
+
+        return redirect()->back()->with('success', 'Estado del negocio actualizado.');
     }
 
     // ==================== MODERACIÓN DE RESEÑAS ====================

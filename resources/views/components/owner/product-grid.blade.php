@@ -21,16 +21,27 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
                 <div class="h-48 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                     @if($product->image_path)
-                        <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 {{ !$product->is_available ? 'grayscale opacity-70' : '' }}">
                     @else
-                        <img src="https://placehold.co/400x300/e2e8f0/64748b?text={{ urlencode($product->name) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <img src="https://placehold.co/400x300/e2e8f0/64748b?text={{ urlencode($product->name) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 {{ !$product->is_available ? 'grayscale opacity-70' : '' }}">
                     @endif
                     <div class="absolute top-3 right-3 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm text-sm font-bold text-purple-700 dark:text-purple-400">
                         $ {{ number_format($product->price, 0, ',', '.') }}
                     </div>
                 </div>
                 <div class="p-5 flex-1 flex flex-col">
-                    <h4 class="font-bold text-gray-900 dark:text-gray-100 text-lg mb-2 truncate">{{ $product->name }}</h4>
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-bold text-gray-900 dark:text-gray-100 text-lg truncate pr-2" :class="{ 'line-through text-gray-400': {{ $product->is_available ? 'false' : 'true' }} }">{{ $product->name }}</h4>
+                        <!-- Toggle Availability button -->
+                        <form action="{{ route('products.toggle', $product->id) }}" method="POST" class="inline">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 {{ $product->is_available ? 'bg-purple-600' : 'bg-gray-300' }}" role="switch" aria-checked="{{ $product->is_available ? 'true' : 'false' }}">
+                                <span class="sr-only">Disponibilidad del producto</span>
+                                <span aria-hidden="true" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $product->is_available ? 'translate-x-4' : 'translate-x-0' }}"></span>
+                            </button>
+                        </form>
+                    </div>
                     <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">{{ $product->description }}</p>
                     <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-4 mt-auto">
                         <button @click="editProduct({{ json_encode($product) }})" class="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold text-sm transition">

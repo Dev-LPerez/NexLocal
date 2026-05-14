@@ -52,6 +52,12 @@
                                 <div>
                                     <p class="font-bold text-gray-900 dark:text-gray-100" x-text="currentOrder.user ? currentOrder.user.name : 'Desconocido'"></p>
                                     <p class="text-sm text-gray-500" x-text="currentOrder.user ? currentOrder.user.email : ''"></p>
+                                    <template x-if="currentOrder.user">
+                                        <button type="button" @click="openChatFromOrder(currentOrder.id, currentOrder.user.name, currentOrder.status)" class="mt-2 inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded-md text-xs font-bold transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                            Contactar Cliente
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
                         </div>

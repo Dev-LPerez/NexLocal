@@ -93,7 +93,7 @@
                     Accesos Rápidos
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <!-- Gestión de Usuarios -->
                     <a href="{{ route('admin.users') }}" class="group block p-4 bg-gray-50 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg border-2 border-transparent hover:border-blue-500 transition">
                         <div class="flex items-center space-x-3">
@@ -120,6 +120,21 @@
                             <div>
                                 <div class="font-semibold text-gray-900 dark:text-gray-100">Experiencias</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400">Control de calidad</div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Moderación de Negocios -->
+                    <a href="{{ route('admin.businesses') }}" class="group block p-4 bg-gray-50 dark:bg-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg border-2 border-transparent hover:border-indigo-500 transition">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+                                <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900 dark:text-gray-100">Negocios</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Supervisar negocios</div>
                             </div>
                         </div>
                     </a>

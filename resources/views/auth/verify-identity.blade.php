@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Verificación de Identidad de Guía
+            Verificación de Identidad de {{ Auth::user()->role === 'guide' ? 'Guía' : 'Emprendedor' }}
         </h2>
     </x-slot>
 
@@ -31,11 +31,17 @@
                                 </svg>
                                 <span class="font-bold text-lg">¡Tu identidad ha sido verificada!</span>
                             </div>
-                            <p>Ya puedes crear y gestionar tus experiencias turísticas sin restricciones.</p>
+                            <p>Ya puedes crear y gestionar tus {{ Auth::user()->role === 'guide' ? 'experiencias turísticas' : 'operaciones en el negocio' }} sin restricciones.</p>
                             <div class="mt-3">
+                                @if(Auth::user()->role === 'guide')
                                 <a href="{{ route('experiences.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition">
                                     Crear Mi Primera Experiencia →
                                 </a>
+                                @else
+                                <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition">
+                                    Ir a mi Dashboard →
+                                </a>
+                                @endif
                             </div>
                         </div>
 
@@ -89,7 +95,7 @@
                         <div class="mb-6">
                             <div class="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-700 dark:text-yellow-400" role="alert">
                                 <span class="font-medium">⚠️ Verificación Requerida</span>
-                                <p class="mt-1">Para garantizar la seguridad y confianza en nuestra plataforma, todos los guías deben verificar su identidad antes de crear experiencias.</p>
+                                <p class="mt-1">Para garantizar la seguridad y confianza en nuestra plataforma, todos los {{ Auth::user()->role === 'guide' ? 'guías y emprendedores' : 'usuarios' }} deben verificar su identidad antes de ofrecer servicios.</p>
                             </div>
 
                             <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">

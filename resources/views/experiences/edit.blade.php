@@ -23,7 +23,7 @@
         function experienceEditForm() {
             return {
                 // Establece la imagen actual si existe, de lo contrario, string vacío
-                imagePreview: '{{ $experience->image_path ? asset('storage/' . $experience->image_path) : '' }}',
+                imagePreview: '{{ $experience->image_path ? Storage::url($experience->image_path) : '' }}',
 
                 previewImage(event) {
                     const input = event.target;

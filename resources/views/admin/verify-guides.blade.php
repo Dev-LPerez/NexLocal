@@ -65,7 +65,7 @@
                                             <div class="flex-shrink-0">
                                                 @if($guide->profile_photo_path)
                                                     <img class="h-16 w-16 rounded-full object-cover border-2 border-indigo-500"
-                                                         src="{{ asset('storage/' . $guide->profile_photo_path) }}"
+                                                         src="{{ Storage::url($guide->profile_photo_path) }}"
                                                          alt="{{ $guide->name }}">
                                                 @else
                                                     <div class="h-16 w-16 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xl font-bold">

@@ -87,7 +87,7 @@
                                             <div class="flex items-center">
                                                 <div class="flex-shrink-0 relative">
                                                     <template x-if="conversation.other_user.profile_photo_path">
-                                                        <img :src="'/storage/' + conversation.other_user.profile_photo_path" class="w-10 h-10 rounded-full object-cover">
+                                                        <img :src="'{{ rtrim(Storage::url(''), '/') }}/' + conversation.other_user.profile_photo_path" class="w-10 h-10 rounded-full object-cover">
                                                     </template>
                                                     <template x-if="!conversation.other_user.profile_photo_path">
                                                         <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold" x-text="conversation.other_user.name.charAt(0)"></div>
@@ -160,7 +160,7 @@
                         <x-slot name="trigger">
                             <button class="flex items-center gap-2 pl-3 pr-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-sm">
                                 @if(Auth::user()->profile_photo_path)
-                                    <img src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="Foto" class="w-8 h-8 rounded-full object-cover">
+                                    <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="Foto" class="w-8 h-8 rounded-full object-cover">
                                 @else
                                     <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold">
                                         {{ substr(Auth::user()->name, 0, 1) }}
@@ -235,7 +235,7 @@
                 <div class="px-4 flex items-center">
                     <div class="flex-shrink-0">
                         @if(Auth::user()->profile_photo_path)
-                            <img src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" class="h-10 w-10 rounded-full object-cover">
+                            <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" class="h-10 w-10 rounded-full object-cover">
                         @else
                             <div class="h-10 w-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">{{ substr(Auth::user()->name, 0, 1) }}</div>
                         @endif

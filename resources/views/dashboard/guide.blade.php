@@ -381,7 +381,7 @@
 
                                                 <div class="flex items-start gap-4 p-4 rounded-xl bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30">
                                                     <img class="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                                                         src="{{ $booking->experience?->image_path ? asset('storage/' . $booking->experience->image_path) : 'https://placehold.co/100x100/e2e8f0/94a3b8?text=NexLocal' }}"
+                                                         src="{{ $booking->experience?->image_path ? Storage::url($booking->experience->image_path) : 'https://placehold.co/100x100/e2e8f0/94a3b8?text=NexLocal' }}"
                                                          alt="Experiencia">
                                                     <div>
                                                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight mb-1">{{ $booking->experience->title }}</h3>
@@ -399,7 +399,7 @@
 
                                                         <div class="flex items-center gap-3 mb-4">
                                                             @if($booking->user->profile_photo_path)
-                                                                <img src="{{ asset('storage/' . $booking->user->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+                                                                <img src="{{ Storage::url($booking->user->profile_photo_path) }}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
                                                             @else
                                                                 <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">
                                                                     {{ substr($booking->user->name, 0, 1) }}

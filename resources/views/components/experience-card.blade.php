@@ -5,7 +5,7 @@
     <div class="relative">
         {{-- Imagen --}}
         <img class="h-56 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-             src="{{ $experience->image_path ? asset('storage/' . $experience->image_path) : 'https://placehold.co/600x400/e9d5ff/8b5cf6?text=NexLocal' }}"
+             src="{{ $experience->image_path ? Storage::url($experience->image_path) : 'https://placehold.co/600x400/e9d5ff/8b5cf6?text=NexLocal' }}"
              alt="{{ $experience->title }}"
              onerror="this.onerror=null; this.src='https://placehold.co/600x400/e9d5ff/8b5cf6?text=Imagen+No+Disponible';">
 

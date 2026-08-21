@@ -13,7 +13,7 @@
                 <div class="flex items-center gap-3 overflow-hidden">
                     <div class="relative flex-shrink-0">
                         <template x-if="window.other_user.profile_photo_path">
-                            <img :src="'/storage/' + window.other_user.profile_photo_path"
+                            <img :src="'{{ rtrim(Storage::url(''), '/') }}/' + window.other_user.profile_photo_path"
                                  class="w-10 h-10 rounded-full object-cover border-2 border-white/30">
                         </template>
                         <template x-if="!window.other_user.profile_photo_path">

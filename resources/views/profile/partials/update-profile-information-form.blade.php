@@ -22,7 +22,7 @@
             <x-input-label for="profile_photo" value="Foto de Perfil" />
             <div class="mt-2 flex items-center space-x-6">
                 @if ($user->profile_photo_path)
-                    <img src="{{ asset('storage/' . $user->profile_photo_path) }}" alt="Foto de perfil actual" class="w-24 h-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600 shadow-md">
+                    <img src="{{ Storage::url($user->profile_photo_path) }}" alt="Foto de perfil actual" class="w-24 h-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600 shadow-md">
                 @else
                     <div class="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-md">
                         {{ substr($user->name, 0, 1) }}

@@ -77,7 +77,7 @@
                                 <div>
                                     <x-input-label value="Imagen actual" />
                                     <div class="mt-1 flex items-center gap-3">
-                                        <img :src="'/storage/' + currentProduct.image_path"
+                                        <img :src="'{{ rtrim(Storage::url(''), '/') }}/' + currentProduct.image_path"
                                             alt="Imagen actual del producto"
                                             class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                                         <p class="text-xs text-gray-500 dark:text-gray-400">

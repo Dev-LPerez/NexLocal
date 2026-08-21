@@ -7,7 +7,7 @@
 
                 {{-- Imagen Principal --}}
                 <div class="relative overflow-hidden rounded-lg shadow-lg" style="padding-bottom: 56.25%;"> {{-- Aspect Ratio 16:9 --}}
-                    <img src="{{ $experience->image_path ? asset('storage/' . $experience->image_path) : 'https://placehold.co/1200x675/e2e8f0/94a3b8?text=NexLocal' }}"
+                    <img src="{{ $experience->image_path ? Storage::url($experience->image_path) : 'https://placehold.co/1200x675/e2e8f0/94a3b8?text=NexLocal' }}"
                          alt="{{ $experience->title }}"
                          class="absolute top-0 left-0 w-full h-full object-cover">
 
@@ -22,7 +22,7 @@
                     <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">{{ $experience->title }}</h1>
                     <div class="mt-2 flex items-center space-x-3">
                         @if($experience->user->profile_photo_path)
-                            <img src="{{ asset('storage/' . $experience->user->profile_photo_path) }}" alt="Foto de perfil del guía" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-500">
+                            <img src="{{ Storage::url($experience->user->profile_photo_path) }}" alt="Foto de perfil del guía" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-500">
                         @endif
                         <span class="text-lg text-gray-700 dark:text-gray-300">
                             Ofrecido por
@@ -41,7 +41,7 @@
                     <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md h-[520px] sm:h-[520px] md:h-[540px] lg:h-[560px] xl:h-[600px] p-0 relative mx-2 sm:mx-0 overflow-hidden flex flex-col">
                         <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-32 w-full flex items-end justify-center relative shrink-0">
                             @if($experience->user->profile_photo_path)
-                                <img src="{{ asset('storage/' . $experience->user->profile_photo_path) }}" alt="Foto de perfil del guía" class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-900 shadow-lg">
+                                <img src="{{ Storage::url($experience->user->profile_photo_path) }}" alt="Foto de perfil del guía" class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-900 shadow-lg">
                             @endif
                         </div>
                         <div class="pt-16 pb-8 px-6 flex-1 flex flex-col items-center overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-200 dark:scrollbar-thumb-indigo-800 scrollbar-track-transparent">
@@ -214,7 +214,7 @@
                             <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center space-x-3">
                                     @if($review->user && $review->user->profile_photo_path)
-                                        <img src="{{ asset('storage/' . $review->user->profile_photo_path) }}" alt="Foto de perfil del turista" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400">
+                                        <img src="{{ Storage::url($review->user->profile_photo_path) }}" alt="Foto de perfil del turista" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400">
                                     @else
                                         <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                             <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

@@ -21,7 +21,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
                 <div class="h-48 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                     @if($product->image_path)
-                        <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 {{ !$product->is_available ? 'grayscale opacity-70' : '' }}">
+                        <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 {{ !$product->is_available ? 'grayscale opacity-70' : '' }}">
                     @else
                         <img src="https://placehold.co/400x300/e2e8f0/64748b?text={{ urlencode($product->name) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 {{ !$product->is_available ? 'grayscale opacity-70' : '' }}">
                     @endif

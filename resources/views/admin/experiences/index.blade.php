@@ -71,7 +71,7 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
                                         @if($exp->image_path)
-                                            <img src="{{ asset('storage/' . $exp->image_path) }}" class="w-16 h-16 object-cover rounded-lg mr-3" alt="">
+                                            <img src="{{ Storage::url($exp->image_path) }}" class="w-16 h-16 object-cover rounded-lg mr-3" alt="">
                                         @endif
                                         <div>
                                             <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $exp->title }}</div>

@@ -68,7 +68,7 @@
                                 <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                                     <div class="flex items-center">
                                         @if($review->user->profile_photo_path)
-                                            <img src="{{ asset('storage/' . $review->user->profile_photo_path) }}"
+                                            <img src="{{ Storage::url($review->user->profile_photo_path) }}"
                                                  class="w-8 h-8 rounded-full mr-2" alt="">
                                         @else
                                             <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs mr-2">

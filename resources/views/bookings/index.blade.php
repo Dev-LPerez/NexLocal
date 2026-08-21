@@ -42,7 +42,7 @@
                                 <div class="w-full lg:w-auto flex-shrink-0 mb-4 lg:mb-0 lg:mr-6">
                                     <div class="relative w-full lg:w-32 h-48 lg:h-32 rounded-lg overflow-hidden shadow-sm">
                                         <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                             src="{{ $booking->experience?->image_path ? asset('storage/' . $booking->experience->image_path) : 'https://placehold.co/400x300/e2e8f0/94a3b8?text=NexLocal' }}"
+                                             src="{{ $booking->experience?->image_path ? Storage::url($booking->experience->image_path) : 'https://placehold.co/400x300/e2e8f0/94a3b8?text=NexLocal' }}"
                                              alt="{{ $booking->experience?->title ?? 'Experiencia' }}">
 
                                         {{-- Badge de Precio sobre la imagen en móvil --}}

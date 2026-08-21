@@ -108,6 +108,19 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the formatted display name of the user role.
+     */
+    public function getRoleLabelAttribute(): string
+    {
+        return match ($this->role) {
+            'admin' => 'Admin',
+            'guide' => 'Guía',
+            'owner' => 'Dueño',
+            default => 'Turista',
+        };
+    }
+
+    /**
      * Get unread notifications count.
      */
     public function unreadNotificationsCount(): int

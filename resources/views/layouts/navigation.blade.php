@@ -168,7 +168,7 @@
                                 @endif
                                 <div class="hidden md:block text-left mr-1">
                                     <p class="text-xs font-bold leading-none">{{ Auth::user()->name }}</p>
-                                    <p class="text-[10px] text-gray-500 leading-none mt-0.5 uppercase">{{ Auth::user()->role === 'guide' ? 'Guía' : (Auth::user()->role === 'owner' ? 'Dueño' : 'Turista') }}</p>
+                                    <p class="text-[10px] text-gray-500 leading-none mt-0.5 uppercase">{{ Auth::user()->role === 'admin' ? 'Admin' : (Auth::user()->role === 'guide' ? 'Guía' : (Auth::user()->role === 'owner' ? 'Dueño' : 'Turista')) }}</p>
                                 </div>
                                 <svg class="fill-current h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                             </button>
@@ -211,7 +211,9 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">Inicio</x-responsive-nav-link>
             @auth
-                @if(Auth::user()->role === 'guide')
+                @if(Auth::user()->role === 'admin')
+                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')" class="text-red-600 dark:text-red-400">Panel Admin</x-responsive-nav-link>
+                @elseif(Auth::user()->role === 'guide')
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Panel de Guía</x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('experiences.create')" :active="request()->routeIs('experiences.create')">Crear Experiencia</x-responsive-nav-link>
                 @elseif(Auth::user()->role === 'tourist')

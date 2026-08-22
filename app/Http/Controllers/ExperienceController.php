@@ -127,7 +127,7 @@ class ExperienceController extends Controller
         $validatedData['user_id'] = Auth::id();
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('experiences', 'public');
+            $path = $request->file('image')->store('experiences', config('filesystems.default'));
             $validatedData['image_path'] = $path;
         }
 
@@ -240,18 +240,14 @@ class ExperienceController extends Controller
             // Código modificado: Intentar borrar la imagen vieja sin romper el sistema
             if ($experience->image_path) {
                 try {
-                    // Verificar si existe antes de intentar borrar, o capturar el error
-                    if (Storage::disk('public')->exists($experience->image_path)) {
-                        Storage::disk('public')->delete($experience->image_path);
+                    if (Storage::disk(config('filesystems.default'))->exists($experience->image_path)) {
+                        Storage::disk(config('filesystems.default'))->delete($experience->image_path);
                     }
                 } catch (\Exception $e) {
-                    // Si falla el borrado (ej. archivo no encontrado), ignoramos el error
-                    // y permitimos que continúe para subir la imagen nueva.
-                    // Log opcional: Log::warning("No se pudo borrar imagen antigua: " . $e->getMessage());
                 }
             }
 
-            $path = $request->file('image')->store('experiences', 'public');
+            $path = $request->file('image')->store('experiences', config('filesystems.default'));
             $validatedData['image_path'] = $path;
         }
 
@@ -345,7 +341,7 @@ class ExperienceController extends Controller
 
         // Si no hay reservas activas, podemos proceder (las reservas pasadas o canceladas no importan)
         if ($experience->image_path) {
-            Storage::disk('public')->delete($experience->image_path);
+            Storage::disk(config('filesystems.default'))->delete($experience->image_path);
         }
 
         $experience->delete(); // Esto eliminará en cascada los slots y bookings asociados

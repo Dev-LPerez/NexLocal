@@ -37,7 +37,7 @@ class RegisteredUserController extends Controller
             'profile_photo' => ['required', 'image', 'max:2048'],
         ]);
 
-        $profilePhotoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+        $profilePhotoPath = $request->file('profile_photo')->store('profile_photos', config('filesystems.default'));
 
         $user = User::create([
             'name' => $request->name,

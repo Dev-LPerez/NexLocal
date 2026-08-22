@@ -53,16 +53,16 @@ class LocalBusinessController extends Controller
 
         if ($request->hasFile('cover_image')) {
             if ($business->cover_image_path) {
-                Storage::disk('public')->delete($business->cover_image_path);
+                Storage::disk(config('filesystems.default'))->delete($business->cover_image_path);
             }
-            $business->cover_image_path = $request->file('cover_image')->store('businesses', 'public');
+            $business->cover_image_path = $request->file('cover_image')->store('businesses', config('filesystems.default'));
         }
 
         if ($request->hasFile('gallery_images')) {
             $gallery = $business->gallery_images ?? [];
             foreach ($request->file('gallery_images') as $image) {
                 if (count($gallery) < 10) {
-                    $gallery[] = $image->store('businesses/gallery', 'public');
+                    $gallery[] = $image->store('businesses/gallery', config('filesystems.default'));
                 }
             }
             $business->gallery_images = $gallery;
@@ -118,7 +118,7 @@ class LocalBusinessController extends Controller
 
         if (($key = array_search($request->image, $gallery)) !== false) {
             unset($gallery[$key]);
-            Storage::disk('public')->delete($request->image);
+            Storage::disk(config('filesystems.default'))->delete($request->image);
             $business->gallery_images = array_values($gallery);
             $business->save();
             return back()->with('success', 'Imagen eliminada de la galería.');
@@ -148,9 +148,9 @@ class LocalBusinessController extends Controller
 
         if ($request->hasFile('banner_image')) {
             if ($business->banner_image_path) {
-                Storage::disk('public')->delete($business->banner_image_path);
+                Storage::disk(config('filesystems.default'))->delete($business->banner_image_path);
             }
-            $data['banner_image_path'] = $request->file('banner_image')->store('businesses/banners', 'public');
+            $data['banner_image_path'] = $request->file('banner_image')->store('businesses/banners', config('filesystems.default'));
         }
 
         // Clean up checkboxes array for operating_hours to ensure unchecked days are still processed if needed

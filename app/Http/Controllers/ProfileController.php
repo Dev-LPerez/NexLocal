@@ -32,7 +32,7 @@ class ProfileController extends Controller
         // Manejar la subida de la foto de perfil
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
-            $path = $file->store('profile_photos', 'public');
+            $path = $file->store('profile_photos', config('filesystems.default'));
             $data['profile_photo_path'] = $path;
         }
 

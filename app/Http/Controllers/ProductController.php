@@ -44,7 +44,7 @@ class ProductController extends Controller
         if ($request->hasFile('prod_images')) {
             $files = $request->file('prod_images');
             if (count($files) > 0) {
-                $product->image_path = $files[0]->store('products', 'public');
+                $product->image_path = $files[0]->store('products', config('filesystems.default'));
                 $product->save();
             }
         }
@@ -109,11 +109,11 @@ class ProductController extends Controller
             if (count($files) > 0) {
                 // Borrar la imagen anterior para no dejar huérfanos en storage
                 if ($product->image_path) {
-                    Storage::disk('public')->delete($product->image_path);
+                    Storage::disk(config('filesystems.default'))->delete($product->image_path);
                 }
 
                 // Guardar la primera imagen enviada como portada
-                $dataToUpdate['image_path'] = $files[0]->store('products', 'public');
+                $dataToUpdate['image_path'] = $files[0]->store('products', config('filesystems.default'));
             }
         }
 
@@ -147,7 +147,7 @@ class ProductController extends Controller
         }
 
         if ($product->image_path) {
-            Storage::disk('public')->delete($product->image_path);
+            Storage::disk(config('filesystems.default'))->delete($product->image_path);
         }
 
         $product->delete();
